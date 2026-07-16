@@ -1,0 +1,16 @@
+# Reference translation for forkers. NOT loaded by the code — only src/i18n/locale.yaml is used.
+locale_code: en-US
+date_style: long
+
+meta:
+  site_title: "SvyatBeloz — the name roulette"
+  og_description: "Today you are — {{name}}"
+
+home:
+  eyebrow: "today you are —"
+  share_button: "Share"
+  reroll_hint: "Result resets at midnight"
+
+share_page:
+  heading: "{{date}}: {{name}}"
+  fallback_heading: "This Svyatoslav is lost in time"

@@ -1,0 +1,70 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, #0f172a, #334155);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #f1f5f9;
+  padding: 1.5rem;
+}
+
+.card {
+  max-width: 40rem;
+  text-align: center;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin: 0 0 0.5rem;
+}
+
+.name {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 800;
+  margin: 0 0 1rem;
+}
+
+.hint {
+  font-size: 1.25rem;
+  color: #cbd5e1;
+  margin: 0 0 2rem;
+}
+
+.share-button {
+  font: inherit;
+  font-size: 1.1rem;
+  padding: 0.75rem 2rem;
+  border-radius: 999px;
+  border: none;
+  background: #f1f5f9;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.share-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.share-button:not(:disabled):hover {
+  background: #e2e8f0;
+}
+
+.reroll-hint {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}

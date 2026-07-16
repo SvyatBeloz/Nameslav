@@ -1,0 +1,15 @@
+category:
+  slug: byt
+  title: Быт
+  version: 1
+  template: whoami
+  weight: 10
+  role: regular
+
+names:
+  - id: posudoslav
+    name: Посудослав
+    hint: раковина сама себя не помоет, но сегодня почему-то смотрит именно на тебя
+  - id: bytoslav
+    name: Бытослав
+    hint: день бытовых мелочей, которые почему-то все разом всплыли

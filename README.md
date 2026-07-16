@@ -77,20 +77,19 @@ public/                # static frontend — no bundler, served as-is
 ## Docker
 
 ```bash
+mkdir -p cache && chown 1000:1000 cache   # once, before the first run
 docker compose up --build
 ```
 
-Requires an external `dmz-network` (the production setup sits behind an existing nginx reverse proxy — see `docs/08-deployment.md`). For a standalone local run, create it once:
-
-```bash
-docker network create dmz-network
-```
+The container runs as a fixed non-root user (`1000:1000`), so the bind-mounted `cache/` directory needs to be writable by that UID beforehand — otherwise `/readyz` starts returning 503. The container also runs with a read-only root filesystem, `cap_drop: ALL`, and no new privileges — see `docs/08-deployment.md` for the full rationale.
 
 Health checks: `GET /livez` (process is alive) and `GET /readyz` (bank/locale loaded, cache directory writable) — the compose healthcheck uses the latter.
 
 ## Name bank
 
 `src/names/bank/` currently ships a minimal starter set (two regular categories plus the `not_found` fallback category). Add more `*.yaml` files following the format in `docs/01-name-bank.md` — the server validates the whole bank at startup and refuses to start on structural problems (duplicate ids/names/slugs, bad references, etc).
+
+Under Docker, both the name bank and `src/i18n/locale.yaml` are bind-mounted read-only into the container, so editing them on the host only needs a `docker compose restart`, not a rebuild.
 
 ## License
 

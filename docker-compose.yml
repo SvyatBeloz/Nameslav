@@ -16,22 +16,26 @@ services:
       - PORT=3000
     security_opt:
       - no-new-privileges=true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
     volumes:
       - ./cache:/app/cache
+      # Edit these on the host + `docker compose restart` to change the name
+      # bank or UI text without rebuilding the image (both are read once at
+      # startup, see docs/01-name-bank.md / docs/04-i18n.md).
+      - ./src/names/bank:/app/dist/names/bank:ro
+      - ./src/i18n/locale.yaml:/app/dist/i18n/locale.yaml:ro
     logging:
       driver: "json-file"
       options:
         max-size: "20m"
         max-file: "4"
-    # networks:
-    #   - dmz-network
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/readyz', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 3s
       retries: 3
       start_period: 10s
-
-# networks:
-#   dmz-network:
-#     external: true

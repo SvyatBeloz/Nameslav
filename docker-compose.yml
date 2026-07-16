@@ -1,25 +1,37 @@
 services:
-  svyatbeloz:
+  nameslav:
     build: .
-    container_name: svyatbeloz-roulette
+    container_name: nameslav-roulette
     restart: unless-stopped
-    expose:
-      - "3000"
+    # expose:
+    #   - "3000"
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: host
     environment:
-      - SITE_DOMAIN=svyatbeloz.link
+      - SITE_DOMAIN=name.svyatbeloz.link
       - NODE_ENV=production
       - PORT=3000
+    security_opt:
+      - no-new-privileges=true
     volumes:
       - ./cache:/app/cache
-    networks:
-      - dmz-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "4"
+    # networks:
+    #   - dmz-network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/readyz', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/readyz', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 3s
       retries: 3
       start_period: 10s
 
-networks:
-  dmz-network:
-    external: true
+# networks:
+#   dmz-network:
+#     external: true

@@ -1,8 +1,8 @@
-# SvyatBeloz Roulette
+# Nameslav Roulette
 
-whoami, but it tells you which Slav you are today.
+*whoami, but it tells you which (.\*)slav you are today*
 
-A joke pet project for `svyatbeloz.link`. The author's colleagues keep mangling his name "Святослав" into compound nicknames — Куберслав, Девопсослав, Домослав and so on. This turns that running joke into a tiny site: every visitor gets a personal "Svyatoslav of the day", computed deterministically from the date and a few harmless browser signals — no accounts, no server-side storage of anything about the visitor.
+A joke pet project for `name.svyatbeloz.link`. The author's colleagues keep mangling his name "Святослав" into compound nicknames — Куберслав, Девопсослав, Домослав and so on. This turns that running joke into a tiny site: every visitor gets a personal "Svyatoslav of the day", computed deterministically from the date and a few harmless browser signals — no accounts, no server-side storage of anything about the visitor.
 
 ## How it works
 

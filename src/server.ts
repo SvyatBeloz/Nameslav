@@ -40,7 +40,7 @@ async function main(): Promise<void> {
   app.use(createConfigRouter(env));
 
   const server = app.listen(env.port, () => {
-    console.log(`svyatbeloz-roulette listening on port ${env.port}`);
+    console.log(`nameslav-roulette listening on port ${env.port}`);
   });
 
   process.on("SIGTERM", () => {

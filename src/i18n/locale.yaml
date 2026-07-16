@@ -2,14 +2,14 @@ locale_code: ru-RU
 date_style: long
 
 meta:
-  site_title: "СвятБелоз — рулетка имён"
+  site_title: "Неймослав - Рулетка имён"
   og_description: "Сегодня ты — {{name}}"
 
 home:
-  eyebrow: "сегодня ты —"
+  eyebrow: "Сегодня ты —"
   share_button: "Поделиться"
-  reroll_hint: "Перезагрузка результата — в полночь"
+  reroll_hint: "Перезагрузка результата — в полночь по GMT"
 
 share_page:
   heading: "{{date}}: {{name}}"
-  fallback_heading: "Этот Святослав потерян во времени"
+  fallback_heading: "Этот Святослав потерян во времени..."

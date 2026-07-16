@@ -3,14 +3,14 @@ locale_code: en-US
 date_style: long
 
 meta:
-  site_title: "SvyatBeloz — the name roulette"
+  site_title: "Nameslav - The Name Roulette"
   og_description: "Today you are — {{name}}"
 
 home:
-  eyebrow: "today you are —"
+  eyebrow: "Today you are —"
   share_button: "Share"
-  reroll_hint: "Result resets at midnight"
+  reroll_hint: "Result resets at midnight (GMT)"
 
 share_page:
   heading: "{{date}}: {{name}}"
-  fallback_heading: "This Svyatoslav is lost in time"
+  fallback_heading: "This Svyatoslav is lost in time..."

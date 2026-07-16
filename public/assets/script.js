@@ -80,5 +80,5 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("SvyatBeloz Roulette: failed to initialize", err);
+  console.error("Nameslav Roulette: failed to initialize", err);
 });

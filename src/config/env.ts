@@ -25,6 +25,6 @@ export const env: Env = {
   siteDomain: requireEnv("SITE_DOMAIN"),
   port: Number(process.env.PORT ?? 3000),
   nodeEnv: process.env.NODE_ENV ?? "production",
-  fingerprintSalt: process.env.FINGERPRINT_SALT ?? "svyatbeloz-default-salt",
+  fingerprintSalt: process.env.FINGERPRINT_SALT ?? "nameslav-default-salt",
   fingerprintFields: parseFingerprintFields(process.env.FINGERPRINT_FIELDS),
 };

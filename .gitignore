@@ -92,6 +92,10 @@ dist
 # vuepress build output
 .vuepress/dist
 
+# Runtime-generated OG image cache (see 08-deployment.md) — keep the directory, not its contents
+/cache/*
+!/cache/.gitkeep
+
 # vuepress v2.x temp directory
 .temp
 

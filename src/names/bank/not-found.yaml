@@ -1,0 +1,15 @@
+category:
+  slug: not-found
+  title: Потерянные
+  version: 1
+  template: whoami
+  weight: 1
+  role: not_found
+
+names:
+  - id: poteryaslav
+    name: Потеряслав
+    hint: этот Святослав потерян во времени — ссылка оказалась битой
+  - id: zabytoslav
+    name: Забытослав
+    hint: кто-то забыл, кем он был сегодня

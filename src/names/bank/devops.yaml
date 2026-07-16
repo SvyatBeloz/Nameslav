@@ -1,0 +1,18 @@
+category:
+  slug: devops
+  title: Девопс
+  version: 1
+  template: whoami
+  weight: 10
+  role: regular
+
+names:
+  - id: kuberslav
+    name: Куберслав
+    hint: сегодня что-то сломается само, и чинить будешь ты
+  - id: devopsoslav
+    name: Девопсослав
+    hint: день, когда "works on my machine" звучит особенно фальшиво
+  - id: aidaroslav
+    name: Айдарослав
+    hint: сегодня твой компьютер — это ты сам

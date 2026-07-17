@@ -66,21 +66,29 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
     const pageUrl = `https://${env.siteDomain}/r/${req.params.token}`;
     const ogImageUrl = `${pageUrl}/og-image.png`;
 
+    const eyebrow = `${date} · #${resolved.category.slug}`;
+
     res.set("Content-Type", "text/html; charset=utf-8");
     res.send(`<!doctype html>
 <html lang="${escapeHtml(locale.locale_code)}">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(heading)}</title>
 <meta property="og:title" content="${escapeHtml(heading)}">
 <meta property="og:description" content="${escapeHtml(description)}">
 <meta property="og:image" content="${escapeHtml(ogImageUrl)}">
 <meta property="og:url" content="${escapeHtml(pageUrl)}">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
-<h1>${escapeHtml(heading)}</h1>
-<p>${escapeHtml(resolved.entry.hint)}</p>
+<main class="card">
+  <p class="eyebrow">${escapeHtml(eyebrow)}</p>
+  <h1 class="name">${escapeHtml(resolved.entry.name)}</h1>
+  <p class="hint">${escapeHtml(resolved.entry.hint)}</p>
+  <a class="share-button" href="/">${escapeHtml(locale.share_page.home_link)}</a>
+</main>
 </body>
 </html>
 `);

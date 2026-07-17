@@ -18,6 +18,7 @@ export const LocaleSchema = z
     share_page: z.object({
       heading: z.string().min(1),
       fallback_heading: z.string().min(1),
+      home_link: z.string().min(1),
     }),
   })
   .superRefine((locale, ctx) => {

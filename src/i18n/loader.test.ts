@@ -18,6 +18,7 @@ home:
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "fallback"
+  home_link: "home"
 `;
 
 function writeTempLocale(content: string): string {

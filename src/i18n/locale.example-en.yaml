@@ -14,3 +14,4 @@ home:
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "This Svyatoslav is lost in time..."
+  home_link: "Find your own name"

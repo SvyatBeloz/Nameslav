@@ -2,7 +2,11 @@
 FROM node:20-slim AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# --include=dev is explicit on purpose: npm's default `omit` is "dev" whenever
+# it sees NODE_ENV=production, and some builders (e.g. Docker Compose's Bake)
+# leak the service's `environment:` into the build — silently dropping
+# devDependencies like typescript and breaking `npm run build` below.
+RUN npm ci --include=dev
 COPY . .
 RUN npm run build
 

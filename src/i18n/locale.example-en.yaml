@@ -8,10 +8,11 @@ meta:
 
 home:
   eyebrow: "Today you are —"
+  start_hint: "press \"Start\" to reveal today's name"
   share_button: "Share"
   reroll_hint: "Result resets at midnight (GMT)"
 
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "This Svyatoslav is lost in time..."
-  home_link: "Find your own name"
+  home_link: "Home"

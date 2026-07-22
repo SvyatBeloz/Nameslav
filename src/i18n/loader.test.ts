@@ -13,6 +13,7 @@ meta:
   og_description: "Desc {{name}}"
 home:
   eyebrow: "eyebrow"
+  start_hint: "start hint"
   share_button: "share"
   reroll_hint: "hint"
 share_page:

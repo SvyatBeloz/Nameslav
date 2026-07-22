@@ -12,6 +12,7 @@ export const LocaleSchema = z
     }),
     home: z.object({
       eyebrow: z.string().min(1),
+      start_hint: z.string().min(1),
       share_button: z.string().min(1),
       reroll_hint: z.string().min(1),
     }),

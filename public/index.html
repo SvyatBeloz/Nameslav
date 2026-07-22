@@ -9,12 +9,45 @@
 <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
-<main class="card">
-  <p id="eyebrow" class="eyebrow"></p>
-  <h1 id="name" class="name">…</h1>
-  <p id="hint" class="hint"></p>
-  <button id="share-button" class="share-button" type="button" disabled></button>
-  <p id="reroll-hint" class="reroll-hint"></p>
+<main class="card" id="card">
+  <div class="bg-idle" aria-hidden="true"></div>
+  <div class="bg-theme" aria-hidden="true"></div>
+  <div class="scanline" aria-hidden="true"></div>
+  <div class="panel">
+    <div class="panel-main">
+      <p class="status" id="status">nameslav.sh · waiting</p>
+      <div class="reel-window" id="reel-window">
+        <button class="start-btn" id="start-button" type="button">Старт<span class="arrow">→</span></button>
+        <div class="reel-track" id="reel-track"></div>
+      </div>
+      <p class="hint" id="hint">нажмите «Старт», чтобы узнать имя дня</p>
+      <div class="meta-mobile" id="meta-mobile">
+        <div class="meta-mobile-col">
+          <span class="meta-category" id="meta-category-m"></span>
+          <span class="meta-id" id="meta-id-m"></span>
+        </div>
+        <div class="meta-mobile-col meta-mobile-col--right">
+          <span class="meta-date" id="meta-date-m"><span class="cursor" id="meta-cursor-m"></span></span>
+          <span class="meta-caption" id="meta-caption-m"></span>
+        </div>
+      </div>
+      <button class="share-btn" id="share-button" type="button" disabled>Поделиться</button>
+      <div class="footer-row">
+        <p class="footnote" id="footnote"></p>
+        <a class="repo-link" href="https://github.com/SvyatBeloz/Nameslav" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="rail" id="rail">
+      <div class="rail-content">
+        <span class="meta-id" id="meta-id-d"></span>
+        <p class="meta-category-vertical" id="meta-category-d"></p>
+        <div class="rail-date-block">
+          <span class="meta-date" id="meta-date-d"><span class="cursor" id="meta-cursor-d"></span></span>
+          <span class="meta-caption" id="meta-caption-d"></span>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 <script type="module" src="/assets/script.js"></script>
 </body>

@@ -52,6 +52,14 @@ function escapeHtml(input: string): string {
     .replace(/'/g, "&#39;");
 }
 
+// Mirrors the hue-from-category-title hash used client-side in script.js,
+// so a share link's accent color matches what the roulette showed at share time.
+function hueFromString(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360;
+  return h;
+}
+
 export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): Router {
   const router = Router();
 
@@ -66,7 +74,13 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
     const pageUrl = `https://${env.siteDomain}/r/${req.params.token}`;
     const ogImageUrl = `${pageUrl}/og-image.png`;
 
-    const eyebrow = `${date} · #${resolved.category.slug}`;
+    const hue = hueFromString(resolved.category.title);
+    const idText = `#${resolved.entry.id}`;
+    const name = escapeHtml(resolved.entry.name);
+    const hint = escapeHtml(resolved.entry.hint);
+    const categoryTitle = escapeHtml(resolved.category.title);
+    const homeLink = escapeHtml(locale.share_page.home_link);
+    const viewCaption = "просмотр по ссылке";
 
     res.set("Content-Type", "text/html; charset=utf-8");
     res.send(`<!doctype html>
@@ -83,12 +97,57 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
 <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
-<main class="card">
-  <p class="eyebrow">${escapeHtml(eyebrow)}</p>
-  <h1 class="name">${escapeHtml(resolved.entry.name)}</h1>
-  <p class="hint">${escapeHtml(resolved.entry.hint)}</p>
-  <a class="share-button" href="/">${escapeHtml(locale.share_page.home_link)}</a>
+<main class="card is-landed is-shared" id="card" style="--hue: ${hue}">
+  <div class="bg-idle" aria-hidden="true"></div>
+  <div class="bg-theme" aria-hidden="true"></div>
+  <div class="scanline" aria-hidden="true"></div>
+  <div class="panel">
+    <div class="panel-main">
+      <p class="status">nameslav.sh · stopped</p>
+      <div class="reel-window">
+        <div class="reel-track"><div class="reel-row">${name}</div></div>
+      </div>
+      <p class="hint">${hint}</p>
+      <div class="meta-mobile">
+        <div class="meta-mobile-col">
+          <span class="meta-category">${categoryTitle}</span>
+          <span class="meta-id">${escapeHtml(idText)}</span>
+        </div>
+        <div class="meta-mobile-col meta-mobile-col--right">
+          <span class="meta-date">${escapeHtml(date)}</span>
+          <span class="meta-caption">${viewCaption}</span>
+        </div>
+      </div>
+      <a class="share-btn" href="/">${homeLink}</a>
+      <div class="footer-row">
+        <p class="footnote">Это уже готовый результат по ссылке — сыграть свой можно на главной</p>
+        <a class="repo-link" href="https://github.com/SvyatBeloz/Nameslav" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="rail-content">
+        <span class="meta-id">${escapeHtml(idText)}</span>
+        <p class="meta-category-vertical">${categoryTitle}</p>
+        <div class="rail-date-block">
+          <span class="meta-date">${escapeHtml(date)}</span>
+          <span class="meta-caption">${viewCaption}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
+<script>
+(function () {
+  var panel = document.querySelector(".panel");
+  panel.addEventListener("mousemove", function (ev) {
+    var r = panel.getBoundingClientRect();
+    var px = (ev.clientY - r.top) / r.height - 0.5;
+    var py = (ev.clientX - r.left) / r.width - 0.5;
+    panel.style.transform = "perspective(1000px) rotateX(" + (px * -1.5) + "deg) rotateY(" + (py * 1.5) + "deg)";
+  });
+  panel.addEventListener("mouseleave", function () { panel.style.transform = ""; });
+})();
+</script>
 </body>
 </html>
 `);

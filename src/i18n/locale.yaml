@@ -7,10 +7,11 @@ meta:
 
 home:
   eyebrow: "Сегодня ты —"
+  start_hint: "нажмите «Старт», чтобы узнать имя дня"
   share_button: "Поделиться"
   reroll_hint: "Перезагрузка результата — в полночь по GMT"
 
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "Этот Святослав потерян во времени..."
-  home_link: "Узнать своё имя"
+  home_link: "На главную"

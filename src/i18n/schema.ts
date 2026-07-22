@@ -12,12 +12,14 @@ export const LocaleSchema = z
     }),
     home: z.object({
       eyebrow: z.string().min(1),
+      start_hint: z.string().min(1),
       share_button: z.string().min(1),
       reroll_hint: z.string().min(1),
     }),
     share_page: z.object({
       heading: z.string().min(1),
       fallback_heading: z.string().min(1),
+      home_link: z.string().min(1),
     }),
   })
   .superRefine((locale, ctx) => {

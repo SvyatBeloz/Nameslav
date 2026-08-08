@@ -10,9 +10,9 @@ export class BankValidationError extends Error {}
 
 /**
  * Cross-file checks Zod can't express per-record: global uniqueness of
- * id/name/slug, and "at most one category per technical role". Throws
- * BankValidationError on the first batch of hard failures; soft issues
- * (empty category, hint/name length) are logged as warnings only.
+ * id/name/slug, "at most one category per technical role", and non-empty
+ * categories. Throws BankValidationError on the first batch of hard failures;
+ * soft issues (hint/name length) are logged as warnings only.
  */
 export function validateBank(categories: Category[]): void {
   const errors: string[] = [];
@@ -44,8 +44,11 @@ export function validateBank(categories: Category[]): void {
       }
     }
 
+    // Hard error, not a warning: the selectors crash on an empty category at
+    // request time (pickEqual for regular, pickFallbackName for not_found),
+    // so fail at startup instead of serving a 500 / blank page later.
     if (category.names.length === 0) {
-      warnings.push(`Пустая категория: ${where}`);
+      errors.push(`Пустая категория (нужна хотя бы одна запись): ${where}`);
     }
 
     for (const entry of category.names) {

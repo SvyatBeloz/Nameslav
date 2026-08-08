@@ -3,10 +3,11 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { mkdirSync } from "node:fs";
 import { env } from "./config/env.js";
-import { loadBank } from "./names/bankLoader.js";
+import { loadBank, type Bank } from "./names/bankLoader.js";
 import { loadLocale } from "./i18n/loader.js";
 import { ogRendererReady } from "./og/renderer.js";
 import { CACHE_DIR } from "./og/dailyImageCache.js";
+import { TEMPLATE_COMPONENTS } from "./og/templates/registry.js";
 import { createHealthRouter, type HealthState } from "./routes/health.js";
 import { createOgImageRouter } from "./routes/ogImage.js";
 import { createShareRouter } from "./routes/share.js";
@@ -22,8 +23,25 @@ const BANK_DIR = join(moduleDir, "names", "bank");
 const LOCALE_PATH = join(moduleDir, "i18n", "locale.yaml");
 const PUBLIC_DIR = join(moduleDir, "..", "public");
 
+/**
+ * Zod validates `template` against the known TEMPLATE_IDS, but a template id can
+ * be declared before it has an implementation (e.g. "random" is reserved).
+ * Rendering such a category would throw per-request (500 on OG images), so fail
+ * at startup instead — same fail-fast contract as the bank validator.
+ */
+function assertTemplatesImplemented(bank: Bank): void {
+  for (const category of bank.categories) {
+    if (!TEMPLATE_COMPONENTS[category.template]) {
+      throw new Error(
+        `Категория "${category.slug}" (${category.sourceFile}) использует нереализованный OG-шаблон "${category.template}"`,
+      );
+    }
+  }
+}
+
 async function main(): Promise<void> {
   const bank = loadBank(BANK_DIR);
+  assertTemplatesImplemented(bank);
   const locale = loadLocale(LOCALE_PATH);
   mkdirSync(CACHE_DIR, { recursive: true });
   await ogRendererReady;

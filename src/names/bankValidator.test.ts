@@ -104,6 +104,17 @@ test("allows multiple regular categories", () => {
   );
 });
 
-test("does not throw on an empty category (warning only)", () => {
-  assert.doesNotThrow(() => validateBank([makeCategory({ names: [] })]));
+test("rejects an empty regular category (selectors would crash on it)", () => {
+  assert.throws(() => validateBank([makeCategory({ names: [] })]), BankValidationError);
+});
+
+test("rejects an empty not_found category (fallback would crash on it)", () => {
+  assert.throws(
+    () =>
+      validateBank([
+        makeCategory(),
+        makeCategory({ slug: "not-found", role: "not_found", sourceFile: "nf.yaml", names: [] }),
+      ]),
+    BankValidationError,
+  );
 });

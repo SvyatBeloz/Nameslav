@@ -5,7 +5,9 @@ export function createLocaleRouter(locale: LocaleConfig): Router {
   const router = Router();
 
   router.get("/api/locale.json", (_req, res) => {
-    res.set("Cache-Control", "public, max-age=86400, immutable");
+    // no-cache + ETag: same reasoning as the other /api endpoints — revalidation
+    // is cheap (served from memory) and locale edits propagate immediately.
+    res.set("Cache-Control", "no-cache");
     res.json(locale);
   });
 

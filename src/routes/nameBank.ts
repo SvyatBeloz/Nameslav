@@ -19,7 +19,10 @@ export function createNameBankRouter(bank: Bank): Router {
   };
 
   router.get("/api/name-bank.json", (_req, res) => {
-    res.set("Cache-Control", "public, max-age=86400, immutable");
+    // no-cache + ETag: the bank is read once at startup and served from memory,
+    // so revalidation is cheap; it lets a bank edit + restart reach clients on
+    // their next request instead of being hidden behind a day-long immutable cache.
+    res.set("Cache-Control", "no-cache");
     res.json(payload);
   });
 

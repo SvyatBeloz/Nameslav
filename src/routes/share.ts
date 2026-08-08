@@ -2,47 +2,11 @@ import { Router } from "express";
 import type { Bank } from "../names/bankLoader.js";
 import type { LocaleConfig } from "../i18n/schema.js";
 import type { Env } from "../config/env.js";
-import type { Category, NameEntry } from "../names/schema.js";
-import { pickFallbackName } from "../names/selector.js";
+import { resolveShareToken } from "../names/shareToken.js";
 import { renderOgImage } from "../og/renderer.js";
 import { formatDate, interpolate } from "../i18n/loader.js";
 import { escapeHtml } from "../utils/html.js";
 import type { OgTemplateProps } from "../og/templates/registry.js";
-
-interface ResolvedShare {
-  category: Category;
-  entry: NameEntry;
-  timestamp: number;
-  isFallback: boolean;
-}
-
-/**
- * Any decoding failure (bad base64, missing separator, unknown id, garbage
- * timestamp) collapses into the same not_found fallback — no explicit 404,
- * per 03-share-link.md ("this Svyatoslav is lost in time" beats a technical error).
- */
-function resolveShareToken(bank: Bank, token: string): ResolvedShare {
-  try {
-    const payload = Buffer.from(token, "base64url").toString("utf-8");
-    const separatorIndex = payload.indexOf(":");
-    if (separatorIndex === -1) {
-      throw new Error("malformed share token payload");
-    }
-
-    const id = payload.slice(0, separatorIndex);
-    const timestamp = Number(payload.slice(separatorIndex + 1));
-
-    const found = bank.idIndex.get(id);
-    if (!found || !Number.isFinite(timestamp)) {
-      throw new Error("unknown id or malformed timestamp");
-    }
-
-    return { category: found.category, entry: found.entry, timestamp, isFallback: false };
-  } catch {
-    const fallback = pickFallbackName(bank);
-    return { ...fallback, timestamp: Date.now(), isFallback: true };
-  }
-}
 
 // Mirrors the hue-from-category-title hash used client-side in script.js,
 // so a share link's accent color matches what the roulette showed at share time.

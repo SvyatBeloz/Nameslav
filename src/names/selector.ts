@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { bytesToUnitFloat, seedToFloats } from "../utils/hash.js";
+import { bytesToUnitFloat } from "../utils/hash.js";
 import type { Bank } from "./bankLoader.js";
 import type { Category, NameEntry } from "./schema.js";
 
@@ -35,23 +35,6 @@ export function pickEqual<T>(items: T[], float: number): T {
   }
   const index = Math.min(Math.floor(float * items.length), items.length - 1);
   return items[index]!;
-}
-
-function getRegularCategories(bank: Bank): Category[] {
-  return bank.categories.filter((category) => category.role === "regular");
-}
-
-/** Deterministic pick by date alone — used for the daily OG image on `/`. */
-export function pickDailyName(bank: Bank, date: string): { category: Category; entry: NameEntry } {
-  const regularCategories = getRegularCategories(bank);
-  const [categoryFloat, nameFloat] = seedToFloats(date, 2);
-  const category = pickWeighted(
-    regularCategories,
-    regularCategories.map((c) => c.weight),
-    categoryFloat!,
-  );
-  const entry = pickEqual(category.names, nameFloat!);
-  return { category, entry };
 }
 
 /**

@@ -22,7 +22,6 @@ services:
     tmpfs:
       - /tmp
     volumes:
-      - ./cache:/app/cache
       # Edit these on the host + `docker compose restart` to change the name
       # bank or UI text without rebuilding the image (both are read once at
       # startup, see docs/01-name-bank.md / docs/04-i18n.md).

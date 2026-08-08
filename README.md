@@ -7,7 +7,7 @@ A joke pet project for `name.svyatbeloz.link`. The author's colleagues keep mang
 ## How it works
 
 - The homepage computes your personal name **entirely in the browser** (date + a hash of a few `navigator`/`screen` values) — nothing is sent to the server, checkable in the Network tab.
-- The daily "name of the day" (shown when the bare domain is shared) is computed server-side from the date alone, same for everyone.
+- When the bare domain is shared, the OG preview is a static "about the service" card — social crawlers cache OG images for a long time, so a rotating daily preview there would go stale anyway (see `docs/06-og-rendering.md`).
 - Results are shareable via `/r/:token` links that carry the result itself (not a seed), so they resolve to the same name for anyone who opens them, including OG-preview crawlers.
 
 See `docs/00-overview.md` onward for the full design — data formats, the selection algorithm, share-link format, i18n, deployment. This README only covers running the code.
@@ -63,8 +63,8 @@ src/
 ├── config/            # env vars, fingerprint field validation
 ├── names/             # name bank loading/validation, selection algorithm
 ├── i18n/              # UI locale loading and date/placeholder formatting
-├── og/                # Takumi-based OG image rendering + daily disk cache
-└── routes/            # Express routes (health, og-image, share, api/*)
+├── og/                # Takumi-based OG image rendering (static root card + share cards)
+└── routes/            # Express routes (home, health, og-image, share, api/*)
 
 public/                # static frontend — no bundler, served as-is
   assets/
@@ -77,13 +77,12 @@ public/                # static frontend — no bundler, served as-is
 ## Docker
 
 ```bash
-mkdir -p cache && chown 1000:1000 cache   # once, before the first run
 docker compose up --build
 ```
 
-The container runs as a fixed non-root user (`1000:1000`), so the bind-mounted `cache/` directory needs to be writable by that UID beforehand — otherwise `/readyz` starts returning 503. The container also runs with a read-only root filesystem, `cap_drop: ALL`, and no new privileges — see `docs/08-deployment.md` for the full rationale.
+No host preparation is needed: the service keeps no disk state, so there is no writable volume to pre-create. The container runs as a fixed non-root user (`1000:1000`) with a read-only root filesystem, `cap_drop: ALL`, and no new privileges — see `docs/08-deployment.md` for the full rationale.
 
-Health checks: `GET /livez` (process is alive) and `GET /readyz` (bank/locale loaded, cache directory writable) — the compose healthcheck uses the latter.
+Health checks: `GET /livez` (process is alive) and `GET /readyz` (bank/locale loaded) — the compose healthcheck uses the latter.
 
 ## Name bank
 

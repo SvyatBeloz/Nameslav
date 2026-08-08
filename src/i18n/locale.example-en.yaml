@@ -4,6 +4,7 @@ date_style: long
 
 meta:
   site_title: "Nameslav - The Name Roulette"
+  site_description: "A joke name roulette: find out which Svyatoslav you are today. No sign-up, no data collection."
   og_description: "Today you are — {{name}}"
 
 home:

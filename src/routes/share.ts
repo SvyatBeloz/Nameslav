@@ -6,6 +6,7 @@ import type { Category, NameEntry } from "../names/schema.js";
 import { pickFallbackName } from "../names/selector.js";
 import { renderOgImage } from "../og/renderer.js";
 import { formatDate, interpolate } from "../i18n/loader.js";
+import { escapeHtml } from "../utils/html.js";
 import type { OgTemplateProps } from "../og/templates/registry.js";
 
 interface ResolvedShare {
@@ -41,15 +42,6 @@ function resolveShareToken(bank: Bank, token: string): ResolvedShare {
     const fallback = pickFallbackName(bank);
     return { ...fallback, timestamp: Date.now(), isFallback: true };
   }
-}
-
-function escapeHtml(input: string): string {
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }
 
 // Mirrors the hue-from-category-title hash used client-side in script.js,

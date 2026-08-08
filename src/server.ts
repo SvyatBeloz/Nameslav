@@ -1,14 +1,13 @@
 import express from "express";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { mkdirSync } from "node:fs";
 import { env } from "./config/env.js";
 import { loadBank, type Bank } from "./names/bankLoader.js";
 import { loadLocale } from "./i18n/loader.js";
 import { ogRendererReady } from "./og/renderer.js";
-import { CACHE_DIR } from "./og/dailyImageCache.js";
 import { TEMPLATE_COMPONENTS } from "./og/templates/registry.js";
 import { createHealthRouter, type HealthState } from "./routes/health.js";
+import { createHomeRouter } from "./routes/home.js";
 import { createOgImageRouter } from "./routes/ogImage.js";
 import { createShareRouter } from "./routes/share.js";
 import { createNameBankRouter } from "./routes/nameBank.js";
@@ -22,6 +21,7 @@ const moduleDir = dirname(fileURLToPath(import.meta.url));
 const BANK_DIR = join(moduleDir, "names", "bank");
 const LOCALE_PATH = join(moduleDir, "i18n", "locale.yaml");
 const PUBLIC_DIR = join(moduleDir, "..", "public");
+const INDEX_PATH = join(PUBLIC_DIR, "index.html");
 
 /**
  * Zod validates `template` against the known TEMPLATE_IDS, but a template id can
@@ -43,15 +43,18 @@ async function main(): Promise<void> {
   const bank = loadBank(BANK_DIR);
   assertTemplatesImplemented(bank);
   const locale = loadLocale(LOCALE_PATH);
-  mkdirSync(CACHE_DIR, { recursive: true });
   await ogRendererReady;
 
   const app = express();
   const healthState: HealthState = { isShuttingDown: false };
 
-  app.use(express.static(PUBLIC_DIR));
-  app.use(createHealthRouter(bank, locale, CACHE_DIR, healthState));
-  app.use(createOgImageRouter(bank, locale, env));
+  // Home router first: it serves GET / (injected OG meta) and redirects
+  // /index.html, so it must run before express.static. index:false stops the
+  // static middleware from also serving the raw, uninjected index.html at /.
+  app.use(createHomeRouter(locale, env, INDEX_PATH));
+  app.use(express.static(PUBLIC_DIR, { index: false }));
+  app.use(createHealthRouter(bank, locale, healthState));
+  app.use(createOgImageRouter(locale, env));
   app.use(createShareRouter(bank, locale, env));
   app.use(createNameBankRouter(bank));
   app.use(createLocaleRouter(locale));

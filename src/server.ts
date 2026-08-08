@@ -64,10 +64,21 @@ async function main(): Promise<void> {
     console.log(`nameslav-roulette listening on port ${env.port}`);
   });
 
-  process.on("SIGTERM", () => {
+  const SHUTDOWN_GRACE_MS = 10_000;
+
+  const shutdown = () => {
     healthState.isShuttingDown = true; // /readyz starts returning 503 — orchestrator stops sending new traffic
     server.close(() => process.exit(0));
-  });
+    // server.close() alone waits for ALL open connections — including idle
+    // keep-alive ones — so without help the process hangs until the
+    // orchestrator's SIGKILL. Close idle connections immediately, and
+    // force-exit after the grace period in case an in-flight request stalls.
+    server.closeIdleConnections();
+    setTimeout(() => process.exit(0), SHUTDOWN_GRACE_MS).unref();
+  };
+
+  process.on("SIGTERM", shutdown); // Docker/Kubernetes stop
+  process.on("SIGINT", shutdown); // Ctrl+C during local dev
 }
 
 main().catch((err) => {

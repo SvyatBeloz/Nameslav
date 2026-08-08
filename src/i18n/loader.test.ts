@@ -10,6 +10,7 @@ locale_code: ru-RU
 date_style: long
 meta:
   site_title: "Title"
+  site_description: "Site description"
   og_description: "Desc {{name}}"
 home:
   eyebrow: "eyebrow"

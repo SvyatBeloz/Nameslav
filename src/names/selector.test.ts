@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { pickWeighted, pickEqual, pickDailyName, pickFallbackName } from "./selector.js";
+import { pickWeighted, pickEqual, pickFallbackName } from "./selector.js";
 import { loadBank } from "./bankLoader.js";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -30,22 +30,6 @@ test("pickEqual splits range evenly and never goes out of bounds", () => {
   assert.equal(pickEqual(items, 0.24), "a");
   assert.equal(pickEqual(items, 0.26), "b");
   assert.equal(pickEqual(items, 0.999999999), "d");
-});
-
-test("pickDailyName is deterministic for the same date", () => {
-  const bank = loadBank(bankDir);
-  const a = pickDailyName(bank, "2026-07-16");
-  const b = pickDailyName(bank, "2026-07-16");
-  assert.equal(a.entry.id, b.entry.id);
-  assert.equal(a.category.slug, b.category.slug);
-});
-
-test("pickDailyName never picks a not_found category", () => {
-  const bank = loadBank(bankDir);
-  for (const date of ["2026-01-01", "2026-06-21", "2026-12-31", "2030-03-14"]) {
-    const { category } = pickDailyName(bank, date);
-    assert.notEqual(category.role, "not_found");
-  }
 });
 
 test("pickFallbackName only ever picks from the not_found category, no NaN/out-of-range over many runs", () => {

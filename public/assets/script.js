@@ -128,7 +128,15 @@ async function main() {
   const targetIdx = pool.findIndex((p) => p.entry.id === entry.id);
   const startIdx = Math.floor(Math.random() * pool.length);
 
-  const dateText = new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date());
+  // Displayed in UTC to match the seed date (todayUtc): the personal name is
+  // keyed on the UTC day, so the caption date must not drift into the browser's
+  // local timezone near midnight.
+  const dateText = new Intl.DateTimeFormat(locale.locale_code, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date());
   [railDate, metaDate].forEach((el) => {
     el.firstChild ? el.insertBefore(document.createTextNode(dateText), el.firstChild) : (el.textContent = dateText);
   });
@@ -180,6 +188,13 @@ async function main() {
     } catch {
       window.prompt(interpolate(locale.home.eyebrow, {}), url);
     }
+  });
+
+  // Sharing rewrites the URL via history.pushState; the browser Back button
+  // returns here but the DOM stays in the "shared" state. The personal name is
+  // deterministic for the day, so a plain reload restores a clean homepage.
+  window.addEventListener("popstate", () => {
+    location.reload();
   });
 
   const panel = document.querySelector(".panel");

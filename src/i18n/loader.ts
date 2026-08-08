@@ -29,7 +29,11 @@ export function interpolate(template: string, vars: Record<string, string>): str
 }
 
 export function formatDate(timestamp: number, locale: LocaleConfig): string {
-  return new Intl.DateTimeFormat(locale.locale_code, { dateStyle: locale.date_style }).format(
-    new Date(timestamp),
-  );
+  // Explicitly UTC: the name a timestamp refers to is keyed on the UTC day
+  // (see 02-selector.md), and the container's local TZ must not shift the
+  // displayed date — so format in UTC to stay consistent with the seed.
+  return new Intl.DateTimeFormat(locale.locale_code, {
+    dateStyle: locale.date_style,
+    timeZone: "UTC",
+  }).format(new Date(timestamp));
 }

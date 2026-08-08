@@ -9,10 +9,8 @@ Nameslav/
 │
 ├── docs/                        # эти документы
 │
-├── cache/                       # volume для дневной OG-картинки; содержимое не коммитится
-│
 ├── public/                      # статика фронтенда — отдаётся express.static, без сборки
-│   ├── index.html
+│   ├── index.html               # шаблон главной: home-роут подставляет OG-мету (см. 07-routes.md)
 │   ├── favicon.ico
 │   └── assets/
 │       ├── style.css
@@ -39,14 +37,14 @@ Nameslav/
     │   └── schema.ts, loader.ts
     │
     ├── og/                              # см. 06-og-rendering.md
-    │   ├── renderer.ts, dailyImageCache.ts
-    │   └── templates/registry.ts, whoami.tsx
+    │   ├── renderer.ts                   # рендер + мемоизация статической карточки
+    │   └── templates/registry.ts, whoami.tsx, staticCard.tsx
     │
     ├── routes/                            # см. 07-routes.md
-    │   ├── health.ts, ogImage.ts, share.ts
+    │   ├── home.ts, health.ts, ogImage.ts, share.ts
     │   └── nameBank.ts, locale.ts, config.ts
     │
-    └── utils/hash.ts                        # seedToFloats — общая математика, см. 02-selector.md
+    └── utils/hash.ts, utils/html.ts          # seedToFloats (см. 02-selector.md) и escapeHtml
 ```
 
 ## Тесты

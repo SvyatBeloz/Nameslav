@@ -8,6 +8,10 @@ export const LocaleSchema = z
     date_style: z.enum(DATE_STYLES),
     meta: z.object({
       site_title: z.string().min(1),
+      // Generic, name-independent service description for the static root
+      // preview (og:description on `/`). og_description below is the
+      // per-name one ("Today you are — {{name}}"), used on share pages.
+      site_description: z.string().min(1),
       og_description: z.string().min(1),
     }),
     home: z.object({

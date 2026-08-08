@@ -1,10 +1,11 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { createElement } from "react";
+import { createElement, type ReactElement } from "react";
 import { Renderer } from "takumi-js/node";
 import { fromJsx } from "takumi-js/helpers/jsx";
 import { TEMPLATE_COMPONENTS, type OgTemplateProps, type TemplateId } from "./templates/registry.js";
+import { StaticOgCard, type StaticOgCardProps } from "./templates/staticCard.js";
 
 const PROJECT_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const FONTS_DIR = join(PROJECT_ROOT, "public", "assets", "fonts");
@@ -26,15 +27,35 @@ export const ogRendererReady: Promise<void> = (async () => {
   await renderer.registerFont({ name: "NotoSansOG", data: bold, weight: 700 });
 })();
 
-export async function renderOgImage(templateId: TemplateId, props: OgTemplateProps): Promise<Buffer> {
+async function renderElement(element: ReactElement): Promise<Buffer> {
   await ogRendererReady;
+  const { node } = await fromJsx(element);
+  return renderer.render(node, { width: OG_WIDTH, height: OG_HEIGHT });
+}
 
+/** Renders a name entry's OG image (share links) via the template registry. */
+export async function renderOgImage(templateId: TemplateId, props: OgTemplateProps): Promise<Buffer> {
   const Component = TEMPLATE_COMPONENTS[templateId];
   if (!Component) {
     throw new Error(`Нет реализации OG-шаблона для template id "${templateId}"`);
   }
+  return renderElement(createElement(Component, props));
+}
 
-  const element = createElement(Component, props);
-  const { node } = await fromJsx(element);
-  return renderer.render(node, { width: OG_WIDTH, height: OG_HEIGHT });
+let staticOgImagePromise: Promise<Buffer> | null = null;
+
+/**
+ * Root-page branding card, rendered once per process and memoized — it carries
+ * no per-day content, so there is nothing to invalidate and no disk cache
+ * (the former dailyImageCache is gone). A failed render drops the memo so the
+ * next request retries instead of caching the failure.
+ */
+export function getStaticOgImage(props: StaticOgCardProps): Promise<Buffer> {
+  if (!staticOgImagePromise) {
+    staticOgImagePromise = renderElement(createElement(StaticOgCard, props)).catch((err) => {
+      staticOgImagePromise = null;
+      throw err;
+    });
+  }
+  return staticOgImagePromise;
 }

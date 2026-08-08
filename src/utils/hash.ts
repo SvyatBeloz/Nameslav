@@ -14,8 +14,11 @@ export function bytesToUnitFloat(bytes: Uint8Array): number {
   const value = Number(uint64) / Number(2n ** 64n);
   // Number(uint64) rounds to the nearest representable double; for the
   // largest uint64 values that rounds up to exactly 2^64, so the division
-  // can land on 1.0 instead of staying in [0, 1). Clamp to the largest
-  // double strictly below 1 to preserve the half-open range invariant.
+  // can land on 1.0 instead of staying in [0, 1). Clamp to a value that is
+  // guaranteed to be strictly below 1 to preserve the half-open range
+  // invariant. (1 - Number.EPSILON is not the largest double below 1 — that
+  // would be 1 - Number.EPSILON/2 — but it is safely < 1, which is all the
+  // invariant needs.)
   return value < 1 ? value : 1 - Number.EPSILON;
 }
 

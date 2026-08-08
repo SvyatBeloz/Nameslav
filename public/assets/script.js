@@ -190,6 +190,13 @@ async function main() {
     }
   });
 
+  // Sharing rewrites the URL via history.pushState; the browser Back button
+  // returns here but the DOM stays in the "shared" state. The personal name is
+  // deterministic for the day, so a plain reload restores a clean homepage.
+  window.addEventListener("popstate", () => {
+    location.reload();
+  });
+
   const panel = document.querySelector(".panel");
   panel.addEventListener("mousemove", (ev) => {
     const r = panel.getBoundingClientRect();

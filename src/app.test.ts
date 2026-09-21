@@ -128,6 +128,57 @@ test("a broken token resolves to the same fallback on every request", async () =
   assert.ok(imageA.length > 0);
 });
 
+test("every response carries the security headers", async () => {
+  // Mounted before the routers, so it must hold for a page, an API payload and
+  // a static asset alike — not just the handlers that remembered to set them.
+  for (const path of ["/", "/api/config.json", "/assets/style.css", "/no-such-page"]) {
+    const res = await fetch(`${base}${path}`);
+    const csp = res.headers.get("content-security-policy") ?? "";
+
+    assert.ok(csp.includes("default-src 'none'"), `${path}: CSP baseline`);
+    assert.ok(csp.includes("script-src 'self'"), `${path}: script-src`);
+    assert.ok(!/script-src[^;]*unsafe-inline/.test(csp), `${path}: no inline scripts allowed`);
+    assert.ok(csp.includes("frame-ancestors 'none'"), `${path}: frame-ancestors`);
+
+    assert.equal(res.headers.get("x-content-type-options"), "nosniff", path);
+    assert.equal(res.headers.get("referrer-policy"), "no-referrer", path);
+    assert.equal(res.headers.get("x-frame-options"), "DENY", path);
+    assert.equal(res.headers.get("x-powered-by"), null, `${path}: framework not advertised`);
+  }
+});
+
+// The CSP forbids inline scripts, so a page carrying one would silently lose
+// that behaviour in a browser while still passing every status-code assertion.
+test("no rendered page relies on an inline script", async () => {
+  const broken = await (await fetch(`${base}/r/not-a-real-token`)).text();
+  const valid = await (await fetch(`${base}/`)).text();
+
+  for (const [name, html] of [["share page", broken], ["homepage", valid]] as const) {
+    assert.ok(!/<script(?![^>]*\ssrc=)[^>]*>/.test(html), `${name}: no inline <script>`);
+    assert.ok(!/\son[a-z]+=/.test(html), `${name}: no inline event handler attributes`);
+  }
+  assert.ok(broken.includes('src="/assets/tilt.js"'), "share page loads the shared tilt module");
+});
+
+test("a fallback page does not claim the visitor is the lost name", async () => {
+  const html = await (await fetch(`${base}/r/not-a-real-token`)).text();
+  const description = /og:description" content="([^"]*)"/.exec(html)?.[1];
+
+  assert.equal(description, locale.share_page.fallback_og_description);
+  // The old bug: meta.og_description is "Сегодня ты — {{name}}", which read as
+  // a cheerful announcement right next to the "lost in time" title.
+  assert.ok(!description?.includes("Сегодня ты"), "not the personal phrasing");
+  assert.ok(html.includes('name="robots" content="noindex"'), "share pages stay unindexed");
+});
+
+test("robots.txt is served and keeps share links crawlable", async () => {
+  const res = await fetch(`${base}/robots.txt`);
+  const body = await res.text();
+  assert.equal(res.status, 200);
+  // Disallowing /r/ would block the social crawlers the share links exist for.
+  assert.ok(!/^\s*Disallow:\s*\/r\//m.test(body), "share links are not disallowed");
+});
+
 test("health endpoints report ready, and 503 once shutdown starts", async () => {
   assert.equal((await fetch(`${base}/livez`)).status, 200);
   assert.equal((await fetch(`${base}/readyz`)).status, 200);

@@ -1,0 +1,8 @@
+# Share links (/r/:token) are intentionally NOT disallowed here: the social
+# preview crawlers that make them worth having — facebookexternalhit,
+# Twitterbot, LinkedInBot — honour robots.txt, so blocking the path would kill
+# the previews it exists for. The pages carry <meta name="robots" content="noindex">
+# instead, which keeps an unbounded space of one-off URLs out of search indexes
+# while still letting crawlers render the card.
+User-agent: *
+Allow: /

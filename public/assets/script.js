@@ -1,6 +1,9 @@
 import { getConfig } from "./config.js";
 import { buildSeed } from "./fingerprint.js";
 import { seedToFloats, pickWeighted, pickEqual } from "./selectorMath.js";
+// Side-effect import: the module wires the panel tilt up by itself, and the
+// share page loads the very same file (see src/routes/share.ts).
+import "./tilt.js";
 
 function base64url(str) {
   const bytes = new TextEncoder().encode(str);
@@ -197,16 +200,6 @@ async function main() {
     location.reload();
   });
 
-  const panel = document.querySelector(".panel");
-  panel.addEventListener("mousemove", (ev) => {
-    const r = panel.getBoundingClientRect();
-    const px = (ev.clientY - r.top) / r.height - 0.5;
-    const py = (ev.clientX - r.left) / r.width - 0.5;
-    panel.style.transform = `perspective(1000px) rotateX(${px * -1.5}deg) rotateY(${py * 1.5}deg)`;
-  });
-  panel.addEventListener("mouseleave", () => {
-    panel.style.transform = "";
-  });
 }
 
 main().catch((err) => {

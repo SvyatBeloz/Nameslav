@@ -68,6 +68,8 @@ web_modules/
 # dotenv environment variable files
 .env
 .env.*
+# ...but the committed template is the one file forkers need to see.
+!.env.example
 !.env.example
 
 # parcel-bundler cache (https://parceljs.org/)

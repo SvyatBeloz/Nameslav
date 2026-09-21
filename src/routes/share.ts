@@ -25,7 +25,12 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
     const heading = resolved.isFallback
       ? locale.share_page.fallback_heading
       : interpolate(locale.share_page.heading, { date, name: resolved.entry.name });
-    const description = interpolate(locale.meta.og_description, { name: resolved.entry.name });
+    // A fallback page is not "today you are — X": nobody is that name, the link
+    // is simply broken. Reusing meta.og_description there put a cheerful
+    // "Сегодня ты — Потеряслав" next to the "lost in time" title.
+    const description = resolved.isFallback
+      ? locale.share_page.fallback_og_description
+      : interpolate(locale.meta.og_description, { name: resolved.entry.name });
 
     const pageUrl = `https://${env.siteDomain}/r/${req.params.token}`;
     const ogImageUrl = `${pageUrl}/og-image.png`;
@@ -48,6 +53,11 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Crawlable but not indexable: social preview crawlers still fetch the page
+     to build the OG card, while search engines stay out of an unbounded space
+     of one-off /r/:token URLs. robots.txt deliberately does NOT disallow them —
+     Facebook's and Twitter's crawlers honour it, and would drop the previews. -->
+<meta name="robots" content="noindex">
 <title>${escapeHtml(heading)}</title>
 <meta property="og:title" content="${escapeHtml(heading)}">
 <meta property="og:description" content="${escapeHtml(description)}">
@@ -96,18 +106,7 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
     </div>
   </div>
 </main>
-<script>
-(function () {
-  var panel = document.querySelector(".panel");
-  panel.addEventListener("mousemove", function (ev) {
-    var r = panel.getBoundingClientRect();
-    var px = (ev.clientY - r.top) / r.height - 0.5;
-    var py = (ev.clientX - r.left) / r.width - 0.5;
-    panel.style.transform = "perspective(1000px) rotateX(" + (px * -1.5) + "deg) rotateY(" + (py * 1.5) + "deg)";
-  });
-  panel.addEventListener("mouseleave", function () { panel.style.transform = ""; });
-})();
-</script>
+<script type="module" src="/assets/tilt.js"></script>
 </body>
 </html>
 `);

@@ -15,6 +15,7 @@ home:
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "Этот Святослав потерян во времени..."
+  fallback_og_description: "Ссылка потерялась во времени — сыграй свою на главной"
   home_link: "На главную"
 
 errors:

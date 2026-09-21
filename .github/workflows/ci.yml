@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: typecheck / tests / audit (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 20 is what package.json `engines` and the Dockerfile target; 22 is the
+        # current LTS. Both are exercised because the test runner and the Takumi
+        # native addon are the kind of thing that differs between majors.
+        node: ["20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # Moderate advisories are noisy for a project whose only request-facing
+      # parser is Express'; high and critical ones should stop the line.
+      - name: Audit
+        run: npm audit --audit-level=high
+
+  docker:
+    name: image builds and serves
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the image
+        run: docker build -t nameslav-roulette:ci .
+
+      # The build alone is not enough: the bank and the locale are copied into
+      # dist/ by hand-written COPY lines, and the OG renderer loads a native
+      # addon plus font files at startup. Only actually running the thing
+      # catches a path that silently stopped resolving.
+      - name: Start the container
+        run: |
+          docker run -d --name nameslav-ci \
+            -e SITE_DOMAIN=example.test \
+            -p 3000:3000 nameslav-roulette:ci
+
+      - name: Wait for readiness
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/readyz > /dev/null; then
+              echo "ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::the container never became ready"
+          docker logs nameslav-ci
+          exit 1
+
+      - name: Smoke-test the rendered surface
+        run: |
+          set -euo pipefail
+
+          # Homepage: served with the OG meta injected from SITE_DOMAIN.
+          curl -fsS http://127.0.0.1:3000/ | grep -q 'https://example.test/og-image.png'
+
+          # OG rendering: the Takumi native addon and the bundled fonts.
+          curl -fsS http://127.0.0.1:3000/og-image.png -o /tmp/og.png
+          file /tmp/og.png | grep -q 'PNG image data'
+
+          # Share link, including the previously-500-ing crafted timestamp.
+          token=$(printf 'kuberslav:1789977530000' | base64 -w0 | tr '+/' '-_' | tr -d '=')
+          curl -fsS "http://127.0.0.1:3000/r/${token}" > /dev/null
+          bad=$(printf 'kuberslav:999999999999999999' | base64 -w0 | tr '+/' '-_' | tr -d '=')
+          curl -fsS "http://127.0.0.1:3000/r/${bad}" > /dev/null
+
+          # Security headers reach real responses, not just the unit tests.
+          curl -fsSI http://127.0.0.1:3000/ | grep -qi 'content-security-policy'
+          ! curl -fsSI http://127.0.0.1:3000/ | grep -qi 'x-powered-by'
+
+      - name: Container logs
+        if: always()
+        run: docker logs nameslav-ci

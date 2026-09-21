@@ -16,6 +16,7 @@ home:
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "This Svyatoslav is lost in time..."
+  fallback_og_description: "This link got lost in time — roll your own on the homepage"
   home_link: "Home"
 
 errors:

@@ -39,7 +39,7 @@ The server starts on `http://localhost:3000` (configurable via `PORT`).
 | `npm run build` | Compiles TypeScript to `dist/` |
 | `npm start` | Runs the compiled server from `dist/server.js` |
 | `npm run typecheck` | Type-checks without emitting |
-| `npm test` | Runs the tests (`node:test`, no extra dependencies) — unit tests plus two that boot the real app |
+| `npm test` | Runs the tests via `scripts/test.mjs` (`node:test`, no extra dependencies) — unit tests plus two that boot the real app |
 
 ## Configuration
 
@@ -65,13 +65,14 @@ src/
 ├── names/             # name bank loading/validation, selection algorithm
 ├── i18n/              # UI locale loading and date/placeholder formatting
 ├── og/                # Takumi-based OG image rendering (static root card + share cards)
-└── routes/            # Express routes (home, health, og-image, share, api/*, 404/500)
+└── routes/            # Express routes (home, health, og-image, share, api/*, 404/500, security headers)
 
 public/                # static frontend — no bundler, served as-is
   assets/
     script.js          # orchestration: fetch config/bank/locale, compute the name, render
     fingerprint.js      # browser signal collectors
     selectorMath.js      # mirror of src/names/selector.ts, using Web Crypto
+    tilt.js               # shared panel-tilt module (homepage + share page)
     fonts/                # bundled Noto Sans (Cyrillic-covering) for OG images
 ```
 

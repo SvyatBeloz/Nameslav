@@ -23,6 +23,9 @@ export const LocaleSchema = z
     share_page: z.object({
       heading: z.string().min(1),
       fallback_heading: z.string().min(1),
+      // og:description for the fallback page. Separate from meta.og_description
+      // because the fallback has no name to announce.
+      fallback_og_description: z.string().min(1),
       home_link: z.string().min(1),
     }),
     // Texts for the 404 / 500 pages. Express' built-in handlers answer in

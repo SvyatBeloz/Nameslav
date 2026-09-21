@@ -11,6 +11,7 @@ import { createNameBankRouter } from "./routes/nameBank.js";
 import { createLocaleRouter } from "./routes/locale.js";
 import { createConfigRouter } from "./routes/config.js";
 import { createErrorHandler, createNotFoundHandler } from "./routes/errors.js";
+import { createSecurityHeaders } from "./routes/security.js";
 
 /**
  * Zod validates `template` against the known TEMPLATE_IDS, but a template id can
@@ -46,6 +47,14 @@ export function createApp(
   paths: AppPaths,
 ): Express {
   const app = express();
+
+  // Advertising the framework and its version only helps someone matching the
+  // deployment against a CVE list.
+  app.disable("x-powered-by");
+
+  // Before every route, so the headers land on static assets, JSON, images and
+  // the 404/500 pages alike — not just the handlers that remembered to set them.
+  app.use(createSecurityHeaders());
 
   // Home router first: it serves GET / (injected OG meta) and redirects
   // /index.html, so it must run before express.static. index:false stops the

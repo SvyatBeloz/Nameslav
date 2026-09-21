@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Source maps carry absolute build-machine paths and are only useful while
+    // developing; the image should not ship them.
+    "sourceMap": false
+  },
+  // tsc compiles whatever `include` matches, tests included — which put
+  // *.test.js (and the integration test that boots a server) into dist/, and
+  // from there straight into the Docker image via `COPY --from=build /app/dist`.
+  "exclude": ["**/*.test.ts"]
+}

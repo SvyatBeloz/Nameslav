@@ -1,5 +1,6 @@
 import { config as loadDotenv } from "dotenv";
 import { parseFingerprintFields, type FingerprintField } from "./fingerprintFields.js";
+import { parsePort } from "./port.js";
 
 // OS-level env vars already set take priority; .env only fills in what's missing
 // (dotenv's default behavior — no extra branching needed).
@@ -23,7 +24,7 @@ export interface Env {
 
 export const env: Env = {
   siteDomain: requireEnv("SITE_DOMAIN"),
-  port: Number(process.env.PORT ?? 3000),
+  port: parsePort(process.env.PORT, 3000),
   nodeEnv: process.env.NODE_ENV ?? "production",
   fingerprintSalt: process.env.FINGERPRINT_SALT ?? "nameslav-default-salt",
   fingerprintFields: parseFingerprintFields(process.env.FINGERPRINT_FIELDS),

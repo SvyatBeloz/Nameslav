@@ -20,6 +20,7 @@ home:
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "fallback"
+  fallback_og_description: "fallback description"
   home_link: "home"
 errors:
   not_found_title: "not found"

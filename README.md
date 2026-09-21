@@ -18,7 +18,7 @@ Node.js + TypeScript + Express, OG images rendered via [Takumi](https://takumi.k
 
 ## Requirements
 
-- Node.js ≥ 20
+- Node.js ≥ 22
 - npm
 
 ## Getting started

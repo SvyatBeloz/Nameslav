@@ -6,9 +6,10 @@
 //                               anywhere else are skipped SILENTLY, and a green
 //                               run means nothing.
 //   --test 'src/**/*.test.ts'   leaves expansion to Node, which only learned to
-//                               do it in v21 — on Node 20 (what package.json
-//                               `engines` and the Dockerfile target) the whole
-//                               command fails with "Could not find".
+//                               do it in v21. The engine floor is 22 now, so
+//                               this spelling would work — but it still leans
+//                               on Node's glob semantics never changing, and it
+//                               reports nothing useful when it matches nothing.
 //   --test src/                 Node's directory discovery looks for JS naming
 //                               conventions, not .ts, and tries to import
 //                               src/index.ts.

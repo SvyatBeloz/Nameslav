@@ -39,6 +39,10 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
     const viewCaption = "просмотр по ссылке";
 
     res.set("Content-Type", "text/html; charset=utf-8");
+    // Explicit rather than implied: with no Cache-Control at all, intermediaries
+    // are free to cache heuristically. no-cache + Express' ETag lets them
+    // revalidate cheaply instead.
+    res.set("Cache-Control", "no-cache");
     res.send(`<!doctype html>
 <html lang="${escapeHtml(locale.locale_code)}">
 <head>
@@ -109,8 +113,11 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
 `);
   });
 
-  // Never cached: every share link is a one-off, per-user/per-moment event
-  // (see 03-share-link.md) — re-rendered from scratch on every request.
+  // Cacheable because the response is a pure function of the token: a valid one
+  // carries both the id and the timestamp, and a broken one now resolves to a
+  // fallback seeded by the token itself (see resolveShareToken). Without this,
+  // every crawler re-render hit the renderer again — an unauthenticated ~60-byte
+  // GET turning into a 22 KB PNG plus CPU, with nothing in front of it.
   router.get("/r/:token/og-image.png", async (req, res, next) => {
     try {
       const resolved = resolveShareToken(bank, req.params.token);
@@ -125,6 +132,12 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
       };
       const image = await renderOgImage(resolved.category.template, props);
       res.set("Content-Type", "image/png");
+      // A valid token pins the date too, so its image never changes. The
+      // fallback's date is "today", so it only holds until the UTC day rolls.
+      res.set(
+        "Cache-Control",
+        resolved.isFallback ? "public, max-age=3600" : "public, max-age=31536000, immutable",
+      );
       res.send(image);
     } catch (err) {
       next(err);

@@ -39,7 +39,7 @@ The server starts on `http://localhost:3000` (configurable via `PORT`).
 | `npm run build` | Compiles TypeScript to `dist/` |
 | `npm start` | Runs the compiled server from `dist/server.js` |
 | `npm run typecheck` | Type-checks without emitting |
-| `npm test` | Runs the unit tests (`node:test`, no extra dependencies) |
+| `npm test` | Runs the tests (`node:test`, no extra dependencies) — unit tests plus two that boot the real app |
 
 ## Configuration
 
@@ -59,12 +59,13 @@ The UI locale (`src/i18n/locale.yaml`) and the name bank (`src/names/bank/*.yaml
 
 ```
 src/
-├── server.ts          # entry point: config → bank → locale → fonts → routes → listen
+├── server.ts          # entry point: config → bank → locale → fonts → createApp → listen
+├── app.ts             # Express wiring, separate from server.ts so tests can drive it
 ├── config/            # env vars, fingerprint field validation
 ├── names/             # name bank loading/validation, selection algorithm
 ├── i18n/              # UI locale loading and date/placeholder formatting
 ├── og/                # Takumi-based OG image rendering (static root card + share cards)
-└── routes/            # Express routes (home, health, og-image, share, api/*)
+└── routes/            # Express routes (home, health, og-image, share, api/*, 404/500)
 
 public/                # static frontend — no bundler, served as-is
   assets/

@@ -21,6 +21,11 @@ share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "fallback"
   home_link: "home"
+errors:
+  not_found_title: "not found"
+  not_found_text: "nothing here"
+  server_error_title: "broken"
+  server_error_text: "try again"
 `;
 
 function writeTempLocale(content: string): string {
@@ -41,6 +46,13 @@ test("loadLocale fails fast with the exact missing key path", () => {
   const withoutShareButton = VALID_LOCALE.replace('  share_button: "share"\n', "");
   const path = writeTempLocale(withoutShareButton);
   assert.throws(() => loadLocale(path), /home\.share_button/);
+  rmSync(path, { force: true });
+});
+
+test("loadLocale requires the error-page texts", () => {
+  const withoutErrors = VALID_LOCALE.replace('  not_found_title: "not found"\n', "");
+  const path = writeTempLocale(withoutErrors);
+  assert.throws(() => loadLocale(path), /errors\.not_found_title/);
   rmSync(path, { force: true });
 });
 

@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 
 /**
  * Interprets exactly 8 bytes as a big-endian uint64 and maps it to [0, 1).
- * Shared by seedToFloats (deterministic) and pickFallbackName (true randomness)
- * so both paths agree on what "a float from 8 bytes" means.
+ * The single definition of what "a float from 8 bytes" means — every selection
+ * path (personal name, share fallback, browser mirror) goes through it.
  */
 export function bytesToUnitFloat(bytes: Uint8Array): number {
   if (bytes.length !== 8) {

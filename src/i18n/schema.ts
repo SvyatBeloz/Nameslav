@@ -25,6 +25,15 @@ export const LocaleSchema = z
       fallback_heading: z.string().min(1),
       home_link: z.string().min(1),
     }),
+    // Texts for the 404 / 500 pages. Express' built-in handlers answer in
+    // English ("Cannot GET /x") and, with NODE_ENV unset, spill a stack trace
+    // into the response body — so the app renders its own pages instead.
+    errors: z.object({
+      not_found_title: z.string().min(1),
+      not_found_text: z.string().min(1),
+      server_error_title: z.string().min(1),
+      server_error_text: z.string().min(1),
+    }),
   })
   .superRefine((locale, ctx) => {
     try {

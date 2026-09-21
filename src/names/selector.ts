@@ -1,5 +1,4 @@
-import { randomBytes } from "node:crypto";
-import { bytesToUnitFloat } from "../utils/hash.js";
+import { seedToFloats } from "../utils/hash.js";
 import type { Bank } from "./bankLoader.js";
 import type { Category, NameEntry } from "./schema.js";
 
@@ -38,17 +37,28 @@ export function pickEqual<T>(items: T[], float: number): T {
 }
 
 /**
- * True-randomness pick used only as a fallback for broken/unknown share tokens.
+ * Fallback pick for broken/unknown share tokens, taken from the not_found
+ * category and derived deterministically from `seed` (the share token itself).
+ *
+ * Determinism is a correctness requirement, not a nicety: `/r/:token` and
+ * `/r/:token/og-image.png` are two separate requests that each resolve the
+ * token on their own. With a truly random pick (the previous behaviour) the
+ * page and its own OG preview could land on different names, and reloading a
+ * broken link showed a different Svyatoslav every time.
+ *
  * Note: `pickPersonalName` (date + fingerprint) is intentionally NOT implemented
  * here — it runs entirely in the browser, see public/assets/selectorMath.js.
  */
-export function pickFallbackName(bank: Bank): { category: Category; entry: NameEntry } {
+export function pickFallbackName(
+  bank: Bank,
+  seed: string,
+): { category: Category; entry: NameEntry } {
   const notFoundCategory = bank.categories.find((category) => category.role === "not_found");
   if (!notFoundCategory) {
     throw new Error("Bank has no category with role 'not_found'");
   }
 
-  const float = bytesToUnitFloat(randomBytes(8));
+  const float = seedToFloats(seed, 1)[0]!;
   const entry = pickEqual(notFoundCategory.names, float);
   return { category: notFoundCategory, entry };
 }

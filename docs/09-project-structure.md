@@ -21,7 +21,9 @@ Nameslav/
 │       └── fonts/                 # Noto Sans — кириллический шрифт для OG-картинок
 │
 └── src/
-    ├── server.ts                 # точка входа: конфиг → банк → локаль → шрифты → роуты → listen
+    ├── server.ts                 # точка входа: конфиг → банк → локаль → шрифты → createApp → listen
+    ├── app.ts                    # сборка Express-приложения; отдельно от server.ts, чтобы тесты
+    │                             #   могли поднять настоящий стек роутов, не слушая порт
     │
     ├── config/
     │   ├── env.ts                 # переменные окружения, typed-конфиг
@@ -42,14 +44,17 @@ Nameslav/
     │
     ├── routes/                            # см. 07-routes.md
     │   ├── home.ts, health.ts, ogImage.ts, share.ts
-    │   └── nameBank.ts, locale.ts, config.ts
+    │   ├── nameBank.ts, locale.ts, config.ts
+    │   └── errors.ts                        # терминальные 404/500, монтируются последними
     │
     └── utils/hash.ts, utils/html.ts          # seedToFloats (см. 02-selector.md) и escapeHtml
 ```
 
 ## Тесты
 
-Рядом с частью модулей лежат `*.test.ts` — юнит-тесты на чистые функции и валидацию, написанные на встроенном `node:test` (без jest/vitest и лишних зависимостей): `utils/hash.test.ts`, `names/selector.test.ts`, `names/bankValidator.test.ts`, `i18n/loader.test.ts`. Запускаются через `npm test`.
+Рядом с модулями лежат `*.test.ts` на встроенном `node:test` (без jest/vitest и лишних зависимостей): юнит-тесты на чистые функции и валидацию (`utils/hash.test.ts`, `utils/html.test.ts`, `names/selector.test.ts`, `names/shareToken.test.ts`, `names/bankValidator.test.ts`, `names/selectorMirror.test.ts`, `i18n/loader.test.ts`, `config/fingerprintFields.test.ts`) плюс два интеграционных: `app.test.ts` поднимает настоящее приложение на случайном порту и ходит в него через `fetch`, `routes/errors.test.ts` проверяет терминальные обработчики. Запускаются через `npm test`.
+
+Глоб в `npm test` обязан быть в кавычках (`--test 'src/**/*.test.ts'`): `sh` не поддерживает globstar и раскрывает `src/**/*.test.ts` ровно в `src/*/*.test.ts` — один уровень вложенности. Node (≥21) раскрывает шаблон сам и находит все файлы, включая `src/app.test.ts` в корне.
 
 ## Осознанное дублирование
 

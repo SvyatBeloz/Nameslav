@@ -22,9 +22,15 @@ COPY --from=build /app/src/i18n/locale.yaml ./dist/i18n/locale.yaml
 
 # node:20-slim already ships a non-root "node" user at uid/gid 1000 — reuse
 # it instead of creating a new one (a second group at gid 1000 would collide
-# with it). docs/README tell operators to chown their bind-mounted ./cache
-# to this same 1000:1000.
+# with it). The service keeps no disk state, so there is nothing on the host to
+# chown for it.
 USER node
+
+# Belt and braces alongside docker-compose's `environment:`. Express' default
+# error handler puts the stack trace in the response body unless NODE_ENV is
+# exactly "production", so a bare `docker run` of this image must not depend on
+# the operator remembering to pass it.
+ENV NODE_ENV=production
 
 EXPOSE 3000
 CMD ["node", "dist/server.js"]

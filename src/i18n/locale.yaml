@@ -16,3 +16,9 @@ share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "Этот Святослав потерян во времени..."
   home_link: "На главную"
+
+errors:
+  not_found_title: "Страница не найдена"
+  not_found_text: "Здесь ничего нет — похоже, в ссылке опечатка."
+  server_error_title: "Что-то сломалось"
+  server_error_text: "Сервис не смог обработать запрос. Попробуйте ещё раз чуть позже."

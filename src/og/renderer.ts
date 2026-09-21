@@ -7,8 +7,11 @@ import { fromJsx } from "takumi-js/helpers/jsx";
 import { TEMPLATE_COMPONENTS, type OgTemplateProps, type TemplateId } from "./templates/registry.js";
 import { StaticOgCard, type StaticOgCardProps } from "./templates/staticCard.js";
 
+// assets/, not public/: these ~1.2 MB of TTFs are read by the OG renderer in
+// this process and never by a browser. Under public/ they were a public
+// download the frontend had no use for.
 const PROJECT_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const FONTS_DIR = join(PROJECT_ROOT, "public", "assets", "fonts");
+const FONTS_DIR = join(PROJECT_ROOT, "assets", "fonts");
 
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;

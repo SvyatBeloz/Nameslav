@@ -13,14 +13,20 @@ meta:
   site_description: "Site description"
   og_description: "Desc {{name}}"
 home:
-  eyebrow: "eyebrow"
+  start_button: "start"
   start_hint: "start hint"
   share_button: "share"
+  share_copied: "copied"
+  copy_prompt: "copy this"
+  today_caption: "today"
   reroll_hint: "hint"
+  load_error: "load error"
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "fallback"
   fallback_og_description: "fallback description"
+  view_caption: "shared"
+  footnote: "footnote"
   home_link: "home"
 errors:
   not_found_title: "not found"

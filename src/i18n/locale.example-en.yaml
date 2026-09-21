@@ -8,15 +8,21 @@ meta:
   og_description: "Today you are — {{name}}"
 
 home:
-  eyebrow: "Today you are —"
+  start_button: "Start"
   start_hint: "press \"Start\" to reveal today's name"
   share_button: "Share"
+  share_copied: "Copied!"
+  copy_prompt: "Copy the link:"
+  today_caption: "today"
   reroll_hint: "Result resets at midnight (GMT)"
+  load_error: "Could not load the data. Please refresh the page."
 
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "This Svyatoslav is lost in time..."
   fallback_og_description: "This link got lost in time — roll your own on the homepage"
+  view_caption: "shared result"
+  footnote: "This is someone's finished result — roll your own on the homepage"
   home_link: "Home"
 
 errors:

@@ -17,6 +17,10 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/public ./public
+# Neither is web-served: templates/ holds the {{PLACEHOLDER}} HTML the routers
+# fill in, assets/ the TTFs the OG renderer loads in-process.
+COPY --from=build /app/templates ./templates
+COPY --from=build /app/assets ./assets
 COPY --from=build /app/src/names/bank ./dist/names/bank
 COPY --from=build /app/src/i18n/locale.yaml ./dist/i18n/locale.yaml
 

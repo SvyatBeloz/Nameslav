@@ -1,11 +1,12 @@
 import { Router } from "express";
+import { readFileSync } from "node:fs";
 import type { Bank } from "../names/bankLoader.js";
 import type { LocaleConfig } from "../i18n/schema.js";
 import type { Env } from "../config/env.js";
 import { resolveShareToken } from "../names/shareToken.js";
 import { renderOgImage } from "../og/renderer.js";
 import { formatDate, interpolate } from "../i18n/loader.js";
-import { escapeHtml } from "../utils/html.js";
+import { renderTemplate } from "../utils/template.js";
 import type { OgTemplateProps } from "../og/templates/registry.js";
 
 // Mirrors the hue-from-category-title hash used client-side in script.js,
@@ -16,8 +17,16 @@ function hueFromString(str: string): number {
   return h;
 }
 
-export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): Router {
+export function createShareRouter(
+  bank: Bank,
+  locale: LocaleConfig,
+  env: Env,
+  templatePath: string,
+): Router {
   const router = Router();
+
+  // Read once at startup, like the homepage: only the values differ per request.
+  const template = readFileSync(templatePath, "utf-8");
 
   router.get("/r/:token", (req, res) => {
     const resolved = resolveShareToken(bank, req.params.token);
@@ -33,83 +42,30 @@ export function createShareRouter(bank: Bank, locale: LocaleConfig, env: Env): R
       : interpolate(locale.meta.og_description, { name: resolved.entry.name });
 
     const pageUrl = `https://${env.siteDomain}/r/${req.params.token}`;
-    const ogImageUrl = `${pageUrl}/og-image.png`;
-
-    const hue = hueFromString(resolved.category.title);
-    const idText = `#${resolved.entry.id}`;
-    const name = escapeHtml(resolved.entry.name);
-    const hint = escapeHtml(resolved.entry.hint);
-    const categoryTitle = escapeHtml(resolved.category.title);
-    const homeLink = escapeHtml(locale.share_page.home_link);
-    const viewCaption = "просмотр по ссылке";
 
     res.set("Content-Type", "text/html; charset=utf-8");
     // Explicit rather than implied: with no Cache-Control at all, intermediaries
     // are free to cache heuristically. no-cache + Express' ETag lets them
     // revalidate cheaply instead.
     res.set("Cache-Control", "no-cache");
-    res.send(`<!doctype html>
-<html lang="${escapeHtml(locale.locale_code)}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- Crawlable but not indexable: social preview crawlers still fetch the page
-     to build the OG card, while search engines stay out of an unbounded space
-     of one-off /r/:token URLs. robots.txt deliberately does NOT disallow them —
-     Facebook's and Twitter's crawlers honour it, and would drop the previews. -->
-<meta name="robots" content="noindex">
-<title>${escapeHtml(heading)}</title>
-<meta property="og:title" content="${escapeHtml(heading)}">
-<meta property="og:description" content="${escapeHtml(description)}">
-<meta property="og:image" content="${escapeHtml(ogImageUrl)}">
-<meta property="og:url" content="${escapeHtml(pageUrl)}">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/assets/style.css">
-</head>
-<body>
-<main class="card is-landed is-shared" id="card" style="--hue: ${hue}">
-  <div class="bg-idle" aria-hidden="true"></div>
-  <div class="bg-theme" aria-hidden="true"></div>
-  <div class="scanline" aria-hidden="true"></div>
-  <div class="panel">
-    <div class="panel-main">
-      <p class="status">nameslav.sh · stopped</p>
-      <div class="reel-window">
-        <div class="reel-track"><div class="reel-row">${name}</div></div>
-      </div>
-      <p class="hint">${hint}</p>
-      <div class="meta-mobile">
-        <div class="meta-mobile-col">
-          <span class="meta-category">${categoryTitle}</span>
-          <span class="meta-id">${escapeHtml(idText)}</span>
-        </div>
-        <div class="meta-mobile-col meta-mobile-col--right">
-          <span class="meta-date">${escapeHtml(date)}</span>
-          <span class="meta-caption">${viewCaption}</span>
-        </div>
-      </div>
-      <a class="share-btn" href="/">${homeLink}</a>
-      <div class="footer-row">
-        <p class="footnote">Это уже готовый результат по ссылке — сыграть свой можно на главной</p>
-        <a class="repo-link" href="https://github.com/SvyatBeloz/Nameslav" target="_blank" rel="noopener">GitHub</a>
-      </div>
-    </div>
-    <div class="rail">
-      <div class="rail-content">
-        <span class="meta-id">${escapeHtml(idText)}</span>
-        <p class="meta-category-vertical">${categoryTitle}</p>
-        <div class="rail-date-block">
-          <span class="meta-date">${escapeHtml(date)}</span>
-          <span class="meta-caption">${viewCaption}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</main>
-<script type="module" src="/assets/tilt.js"></script>
-</body>
-</html>
-`);
+    res.send(
+      renderTemplate(template, {
+        LOCALE_CODE: locale.locale_code,
+        HEADING: heading,
+        OG_DESCRIPTION: description,
+        OG_IMAGE_URL: `${pageUrl}/og-image.png`,
+        PAGE_URL: pageUrl,
+        HUE: String(hueFromString(resolved.category.title)),
+        NAME: resolved.entry.name,
+        HINT: resolved.entry.hint,
+        CATEGORY_TITLE: resolved.category.title,
+        ID_TEXT: `#${resolved.entry.id}`,
+        DATE: date,
+        VIEW_CAPTION: locale.share_page.view_caption,
+        FOOTNOTE: locale.share_page.footnote,
+        HOME_LINK: locale.share_page.home_link,
+      }),
+    );
   });
 
   // Cacheable because the response is a pure function of the token: a valid one

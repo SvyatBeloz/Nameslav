@@ -15,10 +15,19 @@ export const LocaleSchema = z
       og_description: z.string().min(1),
     }),
     home: z.object({
-      eyebrow: z.string().min(1),
+      start_button: z.string().min(1),
       start_hint: z.string().min(1),
       share_button: z.string().min(1),
+      share_copied: z.string().min(1),
+      // Shown by window.prompt when the clipboard API is unavailable or denied.
+      // This used to reuse `eyebrow` ("Сегодня ты —"), a caption that nothing
+      // rendered — the key is gone now that it has a purpose-named replacement.
+      copy_prompt: z.string().min(1),
+      today_caption: z.string().min(1),
       reroll_hint: z.string().min(1),
+      // Rendered into the page by the server, so the message survives even when
+      // every /api/* fetch is what failed.
+      load_error: z.string().min(1),
     }),
     share_page: z.object({
       heading: z.string().min(1),
@@ -26,6 +35,8 @@ export const LocaleSchema = z
       // og:description for the fallback page. Separate from meta.og_description
       // because the fallback has no name to announce.
       fallback_og_description: z.string().min(1),
+      view_caption: z.string().min(1),
+      footnote: z.string().min(1),
       home_link: z.string().min(1),
     }),
     // Texts for the 404 / 500 pages. Express' built-in handlers answer in

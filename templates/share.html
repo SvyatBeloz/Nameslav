@@ -1,0 +1,74 @@
+<!doctype html>
+<!--
+  The /r/:token template. Unlike public/index.html this one is filled per
+  request, by src/routes/share.ts — the result is already known server-side, so
+  nothing here is left for JavaScript to populate. Every value goes through
+  src/utils/template.ts, which escapes all of them.
+
+  Same card structure as index.html: a structural or CSS class change in one of
+  these files almost always belongs in the other too.
+-->
+<html lang="{{LOCALE_CODE}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Crawlable but not indexable: social preview crawlers still fetch the page
+     to build the OG card, while search engines stay out of an unbounded space
+     of one-off /r/:token URLs. robots.txt deliberately does NOT disallow them —
+     Facebook's and Twitter's crawlers honour it, and would drop the previews. -->
+<meta name="robots" content="noindex">
+<title>{{HEADING}}</title>
+<meta property="og:title" content="{{HEADING}}">
+<meta property="og:description" content="{{OG_DESCRIPTION}}">
+<meta property="og:image" content="{{OG_IMAGE_URL}}">
+<meta property="og:url" content="{{PAGE_URL}}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<main class="card is-landed is-shared" id="card" style="--hue: {{HUE}}">
+  <div class="bg-idle" aria-hidden="true"></div>
+  <div class="bg-theme" aria-hidden="true"></div>
+  <div class="scanline" aria-hidden="true"></div>
+  <div class="panel">
+    <div class="panel-main">
+      <!-- Status text is deliberately untranslated (terminal/CLI aesthetic). -->
+      <p class="status">nameslav.sh · stopped</p>
+      <!-- No animation here, so the name is plain readable content — the
+           homepage's aria-hidden reel and live region are not needed. -->
+      <div class="reel-window">
+        <div class="reel-track"><div class="reel-row">{{NAME}}</div></div>
+      </div>
+      <p class="hint">{{HINT}}</p>
+      <div class="meta-mobile">
+        <div class="meta-mobile-col">
+          <span class="meta-category">{{CATEGORY_TITLE}}</span>
+          <span class="meta-id">{{ID_TEXT}}</span>
+        </div>
+        <div class="meta-mobile-col meta-mobile-col--right">
+          <span class="meta-date">{{DATE}}</span>
+          <span class="meta-caption">{{VIEW_CAPTION}}</span>
+        </div>
+      </div>
+      <a class="share-btn" href="/">{{HOME_LINK}}</a>
+      <div class="footer-row">
+        <p class="footnote">{{FOOTNOTE}}</p>
+        <a class="repo-link" href="https://github.com/SvyatBeloz/Nameslav" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="rail-content">
+        <span class="meta-id">{{ID_TEXT}}</span>
+        <p class="meta-category-vertical">{{CATEGORY_TITLE}}</p>
+        <div class="rail-date-block">
+          <span class="meta-date">{{DATE}}</span>
+          <span class="meta-caption">{{VIEW_CAPTION}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script type="module" src="/assets/tilt.js"></script>
+</body>
+</html>

@@ -9,12 +9,13 @@ import type { HealthState } from "./routes/health.js";
 
 // Mirrors the Docker layout from 08-deployment.md: bank/locale get copied
 // INTO dist/ alongside the compiled server (dist/names/bank, dist/i18n/locale.yaml),
-// while public/ stays a sibling of dist/ — so these two resolve differently.
+// while public/ and templates/ stay siblings of dist/ — so these resolve differently.
 const moduleDir = dirname(fileURLToPath(import.meta.url));
+const projectRoot = join(moduleDir, "..");
 const BANK_DIR = join(moduleDir, "names", "bank");
 const LOCALE_PATH = join(moduleDir, "i18n", "locale.yaml");
-const PUBLIC_DIR = join(moduleDir, "..", "public");
-const INDEX_PATH = join(PUBLIC_DIR, "index.html");
+const PUBLIC_DIR = join(projectRoot, "public");
+const TEMPLATES_DIR = join(projectRoot, "templates");
 
 async function main(): Promise<void> {
   const bank = loadBank(BANK_DIR);
@@ -25,7 +26,8 @@ async function main(): Promise<void> {
   const healthState: HealthState = { isShuttingDown: false };
   const app = createApp(bank, locale, env, healthState, {
     publicDir: PUBLIC_DIR,
-    indexPath: INDEX_PATH,
+    homeTemplatePath: join(TEMPLATES_DIR, "index.html"),
+    shareTemplatePath: join(TEMPLATES_DIR, "share.html"),
   });
 
   const server = app.listen(env.port, () => {

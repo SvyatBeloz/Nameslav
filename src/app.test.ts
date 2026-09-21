@@ -38,7 +38,8 @@ function token(payload: string): string {
 before(async () => {
   const app = createApp(bank, locale, env, healthState, {
     publicDir: join(projectRoot, "public"),
-    indexPath: join(projectRoot, "public", "index.html"),
+    homeTemplatePath: join(projectRoot, "templates", "index.html"),
+    shareTemplatePath: join(projectRoot, "templates", "share.html"),
   });
   server = app.listen(0);
   await new Promise((resolve) => server.once("listening", resolve));
@@ -177,6 +178,59 @@ test("robots.txt is served and keeps share links crawlable", async () => {
   assert.equal(res.status, 200);
   // Disallowing /r/ would block the social crawlers the share links exist for.
   assert.ok(!/^\s*Disallow:\s*\/r\//m.test(body), "share links are not disallowed");
+});
+
+// The templates carry {{PLACEHOLDER}} markup and must never be reachable as
+// files; this is why they moved out of public/ rather than relying on
+// express.static's `index: false`.
+test("the HTML templates are not served as static files", async () => {
+  for (const path of ["/share.html", "/templates/index.html", "/templates/share.html"]) {
+    const res = await fetch(`${base}${path}`);
+    assert.equal(res.status, 404, path);
+    assert.ok(!(await res.text()).includes("{{"), `${path}: no raw placeholders`);
+  }
+  // /index.html stays a 301 to the canonical URL rather than a 404.
+  const legacy = await fetch(`${base}/index.html`, { redirect: "manual" });
+  assert.equal(legacy.status, 301);
+});
+
+// The OG fonts are read in-process by the renderer and were never used by the
+// browser; under public/ they were a 1.2 MB public download for nothing.
+test("the OG fonts are no longer part of the web root", async () => {
+  for (const path of ["/assets/fonts/NotoSans-Regular.ttf", "/assets/fonts/NotoSans-Bold.ttf"]) {
+    assert.equal((await fetch(`${base}${path}`)).status, 404, path);
+  }
+  // …while the renderer still finds them.
+  assert.equal((await fetch(`${base}/og-image.png`)).status, 200);
+});
+
+test("both pages take every visible string from the locale", async () => {
+  const home = await (await fetch(`${base}/`)).text();
+  for (const text of [locale.home.start_button, locale.home.start_hint, locale.home.share_button]) {
+    assert.ok(home.includes(text), `homepage renders ${JSON.stringify(text)}`);
+  }
+  // Rendered into the document so the message survives a failed locale fetch.
+  assert.ok(home.includes(locale.home.load_error), "load error text is in the page");
+
+  const share = await (await fetch(`${base}/r/not-a-real-token`)).text();
+  for (const text of [
+    locale.share_page.view_caption,
+    locale.share_page.footnote,
+    locale.share_page.home_link,
+  ]) {
+    assert.ok(share.includes(text), `share page renders ${JSON.stringify(text)}`);
+  }
+});
+
+test("the spinning reel is hidden from assistive tech, with a live region instead", async () => {
+  const home = await (await fetch(`${base}/`)).text();
+  assert.match(home, /class="reel-window"[^>]*aria-hidden="true"/, "reel is not announced");
+  assert.match(home, /id="result-announcement"[^>]*aria-live="polite"/, "outcome is");
+  assert.ok(home.includes('rel="icon"'), "favicon is linked rather than only probed");
+
+  // The share page has no animation, so its name is plain readable content.
+  const share = await (await fetch(`${base}/r/not-a-real-token`)).text();
+  assert.ok(!/class="reel-window"[^>]*aria-hidden/.test(share), "share reel stays readable");
 });
 
 test("health endpoints report ready, and 503 once shutdown starts", async () => {

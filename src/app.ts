@@ -30,8 +30,12 @@ export function assertTemplatesImplemented(bank: Bank): void {
 }
 
 export interface AppPaths {
+  /** Web root: everything in here is served verbatim by express.static. */
   publicDir: string;
-  indexPath: string;
+  /** Server-side HTML templates. Deliberately NOT under publicDir — serving
+   *  one raw would leak {{PLACEHOLDER}} markup to visitors and crawlers. */
+  homeTemplatePath: string;
+  shareTemplatePath: string;
 }
 
 /**
@@ -59,11 +63,11 @@ export function createApp(
   // Home router first: it serves GET / (injected OG meta) and redirects
   // /index.html, so it must run before express.static. index:false stops the
   // static middleware from also serving the raw, uninjected index.html at /.
-  app.use(createHomeRouter(locale, env, paths.indexPath));
+  app.use(createHomeRouter(locale, env, paths.homeTemplatePath));
   app.use(express.static(paths.publicDir, { index: false }));
   app.use(createHealthRouter(bank, locale, healthState));
   app.use(createOgImageRouter(locale, env));
-  app.use(createShareRouter(bank, locale, env));
+  app.use(createShareRouter(bank, locale, env, paths.shareTemplatePath));
   app.use(createNameBankRouter(bank));
   app.use(createLocaleRouter(locale));
   app.use(createConfigRouter(env));

@@ -12,10 +12,6 @@ function base64url(str) {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function interpolate(template, vars) {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? "");
-}
-
 function todayUtc() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -93,8 +89,6 @@ async function main() {
     fetchJson("/api/locale.json"),
   ]);
 
-  document.title = locale.meta.site_title;
-
   const date = todayUtc();
   const seed = buildSeed(date, config.fingerprintFields, config.fingerprintSalt);
   const [categoryFloat, nameFloat] = await seedToFloats(seed, 2);
@@ -114,6 +108,7 @@ async function main() {
   const hintEl = document.getElementById("hint");
   const shareButton = document.getElementById("share-button");
   const footnoteEl = document.getElementById("footnote");
+  const announcement = document.getElementById("result-announcement");
 
   const railId = document.getElementById("meta-id-d");
   const railCategory = document.getElementById("meta-category-d");
@@ -123,9 +118,6 @@ async function main() {
   const metaCategory = document.getElementById("meta-category-m");
   const metaDate = document.getElementById("meta-date-m");
   const metaCaption = document.getElementById("meta-caption-m");
-
-  hintEl.textContent = locale.home.start_hint;
-  shareButton.textContent = locale.home.share_button;
 
   const pool = buildFlatPool(nameBank);
   const targetIdx = pool.findIndex((p) => p.entry.id === entry.id);
@@ -143,8 +135,8 @@ async function main() {
   [railDate, metaDate].forEach((el) => {
     el.firstChild ? el.insertBefore(document.createTextNode(dateText), el.firstChild) : (el.textContent = dateText);
   });
-  railCaption.textContent = "сегодня";
-  metaCaption.textContent = "сегодня";
+  railCaption.textContent = locale.home.today_caption;
+  metaCaption.textContent = locale.home.today_caption;
 
   startButton.addEventListener("click", () => {
     startButton.hidden = true;
@@ -167,6 +159,10 @@ async function main() {
 
       shareButton.disabled = false;
       footnoteEl.textContent = locale.home.reroll_hint;
+
+      // The reel itself is aria-hidden (announcing every name that spins past
+      // would be unusable), so the outcome is spoken once, here.
+      announcement.textContent = `${entry.name}. ${entry.hint}`;
     });
   });
 
@@ -178,18 +174,20 @@ async function main() {
     card.classList.add("is-shared");
     shareButton.disabled = true;
     statusEl.textContent = "nameslav.sh · stopped";
-    railCaption.textContent = "просмотр по ссылке";
-    metaCaption.textContent = "просмотр по ссылке";
+    railCaption.textContent = locale.share_page.view_caption;
+    metaCaption.textContent = locale.share_page.view_caption;
 
     try {
       await navigator.clipboard.writeText(url);
       const original = locale.home.share_button;
-      shareButton.textContent = "Скопировано!";
+      shareButton.textContent = locale.home.share_copied;
       setTimeout(() => {
         shareButton.textContent = original;
       }, 1500);
     } catch {
-      window.prompt(interpolate(locale.home.eyebrow, {}), url);
+      // No clipboard permission (or no secure context) — hand the URL over in a
+      // prompt the visitor can copy out of.
+      window.prompt(locale.home.copy_prompt, url);
     }
   });
 
@@ -204,4 +202,19 @@ async function main() {
 
 main().catch((err) => {
   console.error("Nameslav Roulette: failed to initialize", err);
+
+  // Surface it. The message is rendered into the document by the server, because
+  // the thing that failed may well be the /api/locale.json fetch itself.
+  const startButton = document.getElementById("start-button");
+  const hintEl = document.getElementById("hint");
+  const statusEl = document.getElementById("status");
+
+  if (startButton) startButton.hidden = true;
+  if (statusEl) statusEl.textContent = "nameslav.sh · error";
+  if (hintEl) {
+    hintEl.textContent = document.body.dataset.loadError ?? "";
+    // Not aria-hidden like the reel, but it changes after load, so make sure it
+    // is announced rather than silently replaced.
+    hintEl.setAttribute("role", "alert");
+  }
 });

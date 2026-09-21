@@ -2,29 +2,31 @@ import { Router } from "express";
 import { readFileSync } from "node:fs";
 import type { LocaleConfig } from "../i18n/schema.js";
 import type { Env } from "../config/env.js";
-import { escapeHtml } from "../utils/html.js";
+import { renderTemplate } from "../utils/template.js";
 
 /**
  * Serves the homepage with server-injected, ABSOLUTE Open Graph meta tags.
  * The page itself stays static and personalization still happens entirely in
  * the browser — but OG crawlers don't run JS and need correct meta in the raw
  * HTML, and a static file can't know its own SITE_DOMAIN. So we render the
- * head once at startup from the index.html template (placeholders below) and
- * serve that. See docs/06-og-rendering.md and docs/07-routes.md.
- *
- * Placeholders replaced: {{LOCALE_CODE}}, {{SITE_TITLE}}, {{SITE_DESCRIPTION}},
- * {{OG_IMAGE_URL}}, {{SITE_URL}}.
+ * template once at startup and serve the result.
+ * See docs/06-og-rendering.md and docs/07-routes.md.
  */
-export function createHomeRouter(locale: LocaleConfig, env: Env, indexPath: string): Router {
+export function createHomeRouter(locale: LocaleConfig, env: Env, templatePath: string): Router {
   const router = Router();
 
   const siteUrl = `https://${env.siteDomain}`;
-  const html = readFileSync(indexPath, "utf-8")
-    .replaceAll("{{LOCALE_CODE}}", escapeHtml(locale.locale_code))
-    .replaceAll("{{SITE_TITLE}}", escapeHtml(locale.meta.site_title))
-    .replaceAll("{{SITE_DESCRIPTION}}", escapeHtml(locale.meta.site_description))
-    .replaceAll("{{OG_IMAGE_URL}}", escapeHtml(`${siteUrl}/og-image.png`))
-    .replaceAll("{{SITE_URL}}", escapeHtml(`${siteUrl}/`));
+  const html = renderTemplate(readFileSync(templatePath, "utf-8"), {
+    LOCALE_CODE: locale.locale_code,
+    SITE_TITLE: locale.meta.site_title,
+    SITE_DESCRIPTION: locale.meta.site_description,
+    OG_IMAGE_URL: `${siteUrl}/og-image.png`,
+    SITE_URL: `${siteUrl}/`,
+    START_BUTTON: locale.home.start_button,
+    START_HINT: locale.home.start_hint,
+    SHARE_BUTTON: locale.home.share_button,
+    LOAD_ERROR: locale.home.load_error,
+  });
 
   router.get("/", (_req, res) => {
     res.set("Content-Type", "text/html; charset=utf-8");
@@ -34,7 +36,8 @@ export function createHomeRouter(locale: LocaleConfig, env: Env, indexPath: stri
     res.send(html);
   });
 
-  // Single canonical URL: /index.html must not serve a second, uninjected copy.
+  // Single canonical URL. The template no longer lives under public/, so this is
+  // about the canonical URL only — there is no raw copy left to leak.
   router.get("/index.html", (_req, res) => {
     res.redirect(301, "/");
   });

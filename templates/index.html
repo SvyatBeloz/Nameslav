@@ -1,8 +1,14 @@
 <!doctype html>
 <!--
-  Placeholders ({{...}}) are substituted by the home router at startup
-  (src/routes/home.ts) — the raw file is never served directly: GET / renders
-  it, GET /index.html redirects to /.
+  The homepage template. Placeholders spelled {{...}} in upper snake case are
+  filled once at startup by src/routes/home.ts via src/utils/template.ts; the raw
+  file is never served (GET / renders it, GET /index.html redirects to /).
+  Note the renderer is strict both ways — an unfilled placeholder and an unused
+  value are both errors — so prose here must not spell a real placeholder name.
+
+  public/share.html is its sibling for /r/:token — same card structure, but
+  server-rendered instead of filled in by script.js. Structural or CSS class
+  changes here almost always need the same edit there.
 -->
 <html lang="{{LOCALE_CODE}}">
 <head>
@@ -15,21 +21,29 @@
 <meta property="og:url" content="{{SITE_URL}}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="stylesheet" href="/assets/style.css">
 </head>
-<body>
+<!-- data-load-error is rendered server-side on purpose: if the failure is that
+     /api/locale.json never arrived, script.js has no locale left to read. -->
+<body data-load-error="{{LOAD_ERROR}}">
 <main class="card" id="card">
   <div class="bg-idle" aria-hidden="true"></div>
   <div class="bg-theme" aria-hidden="true"></div>
   <div class="scanline" aria-hidden="true"></div>
   <div class="panel">
     <div class="panel-main">
+      <!-- Status text is deliberately untranslated (terminal/CLI aesthetic). -->
       <p class="status" id="status">nameslav.sh · waiting</p>
-      <div class="reel-window" id="reel-window">
-        <button class="start-btn" id="start-button" type="button">Старт<span class="arrow">→</span></button>
+      <!-- The reel is pure motion: announcing every name that flies past would
+           make the page unusable with a screen reader, so it is hidden from the
+           accessibility tree and #result-announcement speaks the outcome once. -->
+      <div class="reel-window" id="reel-window" aria-hidden="true">
+        <button class="start-btn" id="start-button" type="button">{{START_BUTTON}}<span class="arrow">→</span></button>
         <div class="reel-track" id="reel-track"></div>
       </div>
-      <p class="hint" id="hint">нажмите «Старт», чтобы узнать имя дня</p>
+      <p class="sr-only" id="result-announcement" role="status" aria-live="polite"></p>
+      <p class="hint" id="hint">{{START_HINT}}</p>
       <div class="meta-mobile" id="meta-mobile">
         <div class="meta-mobile-col">
           <span class="meta-category" id="meta-category-m"></span>
@@ -40,7 +54,7 @@
           <span class="meta-caption" id="meta-caption-m"></span>
         </div>
       </div>
-      <button class="share-btn" id="share-button" type="button" disabled>Поделиться</button>
+      <button class="share-btn" id="share-button" type="button" disabled>{{SHARE_BUTTON}}</button>
       <div class="footer-row">
         <p class="footnote" id="footnote"></p>
         <a class="repo-link" href="https://github.com/SvyatBeloz/Nameslav" target="_blank" rel="noopener">GitHub</a>

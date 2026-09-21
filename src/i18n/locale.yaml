@@ -7,15 +7,21 @@ meta:
   og_description: "Сегодня ты — {{name}}"
 
 home:
-  eyebrow: "Сегодня ты —"
+  start_button: "Старт"
   start_hint: "нажмите «Старт», чтобы узнать имя дня"
   share_button: "Поделиться"
+  share_copied: "Скопировано!"
+  copy_prompt: "Скопируйте ссылку:"
+  today_caption: "сегодня"
   reroll_hint: "Перезагрузка результата — в полночь по GMT"
+  load_error: "Не удалось загрузить данные. Обновите страницу."
 
 share_page:
   heading: "{{date}}: {{name}}"
   fallback_heading: "Этот Святослав потерян во времени..."
   fallback_og_description: "Ссылка потерялась во времени — сыграй свою на главной"
+  view_caption: "просмотр по ссылке"
+  footnote: "Это уже готовый результат по ссылке — сыграть свой можно на главной"
   home_link: "На главную"
 
 errors:

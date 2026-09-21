@@ -67,13 +67,18 @@ src/
 ├── og/                # Takumi-based OG image rendering (static root card + share cards)
 └── routes/            # Express routes (home, health, og-image, share, api/*, 404/500, security headers)
 
+templates/             # server-filled HTML — deliberately NOT web-served
+  index.html           # homepage
+  share.html           # /r/:token
+
+assets/fonts/          # bundled Noto Sans (Cyrillic-covering), read by the OG renderer
+
 public/                # static frontend — no bundler, served as-is
   assets/
     script.js          # orchestration: fetch config/bank/locale, compute the name, render
     fingerprint.js      # browser signal collectors
     selectorMath.js      # mirror of src/names/selector.ts, using Web Crypto
     tilt.js               # shared panel-tilt module (homepage + share page)
-    fonts/                # bundled Noto Sans (Cyrillic-covering) for OG images
 ```
 
 ## Docker

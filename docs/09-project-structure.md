@@ -12,8 +12,13 @@ Nameslav/
 │
 ├── docs/                        # эти документы
 │
-├── public/                      # статика фронтенда — отдаётся express.static, без сборки
-│   ├── index.html               # шаблон главной: home-роут подставляет OG-мету (см. 07-routes.md)
+├── templates/                   # HTML-шаблоны страниц — наружу НЕ отдаются (см. 07-routes.md)
+│   ├── index.html               # главная; заполняется один раз при старте
+│   └── share.html               # /r/:token; заполняется на каждый запрос
+│
+├── assets/fonts/                # Noto Sans для OG-картинок — читает только сервер
+│
+├── public/                      # веб-корень — отдаётся express.static как есть, без сборки
 │   ├── robots.txt               # обход разрешён целиком, см. 07-routes.md
 │   ├── favicon.ico
 │   └── assets/
@@ -22,8 +27,7 @@ Nameslav/
 │       ├── config.js            # fetch('/api/config.json') один раз, кэширует результат
 │       ├── fingerprint.js        # сбор браузерных сигналов
 │       ├── selectorMath.js        # зеркало src/names/selector.ts (Web Crypto вместо node:crypto)
-│       ├── tilt.js                 # параллакс-наклон панели; общий для главной и share-страницы
-│       └── fonts/                 # Noto Sans — кириллический шрифт для OG-картинок
+│       └── tilt.js                 # параллакс-наклон панели; общий для главной и share-страницы
 │
 └── src/
     ├── server.ts                 # точка входа: конфиг → банк → локаль → шрифты → createApp → listen
@@ -54,7 +58,8 @@ Nameslav/
     │   ├── errors.ts                        # терминальные 404/500, монтируются последними
     │   └── security.ts                      # CSP и прочие заголовки, монтируется первым
     │
-    └── utils/hash.ts, utils/html.ts          # seedToFloats (см. 02-selector.md) и escapeHtml
+    └── utils/hash.ts, utils/html.ts, utils/template.ts   # seedToFloats (см. 02-selector.md),
+                                                          #   escapeHtml и заполнение шаблонов
 ```
 
 ## Тесты
